@@ -1,0 +1,59 @@
+TODO for Apple //e LLVM-MOS port:
+
+HIGH PRIORITY:
+
+- Add a CMakeLists.txt file that automatically bundles all of the common libraries you need.
+  - Your current command is: "/path/to/mos-common-clang -Os -o output/hello.sys main.c apple-char-io.c prodos-exit.S -lexit-custom -linit-stack -lzero-bss"
+  - Figure out how your CMakeLists file will get recognized at a program level.
+  - Use https://github.com/llvm-mos/llvm-mos-sdk/blob/f5a0fa476d80bd8d4b837def49528bc28ba4ea71/mos-platform/sim/CMakeLists.txt as a reference.
+  - Make sure you add:
+    - init-stack (for printf/varargs/dynamic ProDOS syscalls)
+    - exit-custom (for ProDOS QUIT)
+  - It's quite possible, according to the "Extending_SDK" entry in the wiki,
+    that you may need to do this as part of adding your platform to the SDK.
+- Fill the system bitmap. You will need an extra _init library that does this
+  with the program's current size and with the stack section.
+
+MID PRIORITY:
+
+- Get more stdlib input to work (in particular, get getchar() to work)
+- Come up with a mechanism for dynamically assembling ProDOS syscalls
+  - Because the byte and word for syscall parameters is expected to immediately
+    follow the JSR $BF00 instruction, but the parameter pointers are expected
+    to change as you, say, do lots of read() and write() calls, you will need
+    a structure somewhere that you can safely fill with these parameter pointers
+    (likely with an RTS at the end).
+  - You could probably do this with a global, but you could also create locals
+    each time. Test what the compiler does with this information.
+- Write stdlib implementations for the following functions:
+  - open()
+  - creat()
+  - read()
+  - write()
+  - fstat() (or some variety thereof)
+  - close()
+  - opendir()
+  - readdir()
+  - closedir()
+
+LOW PRIORITY:
+
+- Expose an alternate linking strategy that causes the main body of the program to be copied
+  to $6000 in order to allow HIRES graphics.
+  - Include startup routines for this
+  - (Ideally) Skip copying the copy routine to save however many bytes,
+    or copy it such that the initial copy routine is in the last few bytes
+    of HIRES Page 2.
+  - Be sure to include the HIRES pages in the bitmap, and also ensure, as part of your copy routine,
+    that /RAM has the two 8K files written to it to protect HIRES during auxilliary memory
+    accesses.
+- Write an implementation of morecore()
+  - morecore() should use the system bitmap, as well as a sort of "round robin" pointer search
+    strategy, to locate a suitable open page of memory. It will always return a segment
+    that is a multiple of 256 bytes.
+  - Write another function that can relinquish the core back to ProDOS.
+  - (Note: Figure out what these functions are called so that you can drop in a malloc()
+    implementation, though it may well be better to write these in anticipation of an arena allocator).
+
+WHEN YOU'RE READY:
+- Include your port in the LLVM-MOS SDK (https://llvm-mos.org/wiki/Extending_SDK).

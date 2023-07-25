@@ -4,11 +4,8 @@ char __getchar();
 char *PROGRAM_VERSION_NUMBER_LOCATION = (char *) 0xbffd;
 char *SYSTEM_BITMAP_LOCATION = (char *) 0xbf58;
 
-// TODO: You've broken varargs somehow! Congratulations!
-// See what you can do to get them working again:
-// - You know it's something specifically wrong with your setup.
-//   Running the same functions (including print_hex_byte) in
-//   the 6502 simulator does cause them to work correctly.
+// An uninitialized bss variable
+static char BULLSHIT_BSS[1000];
 
 __attribute__((noinline))
 static void print_hex_byte(unsigned char x) {
@@ -114,6 +111,15 @@ static void varargs_tests() {
     var_args_test_4("4", (void *) 0x3080, 'x', (void *) 0x4060);
 }
 
+static unsigned long next = 1;
+const unsigned long RAND_MAX = 65535;
+int rand() {
+    return ((next = next * 1103515245 + 12345) % ((unsigned long )RAND_MAX + 1));
+}
+void srand(unsigned int seed) {
+    next = seed;
+}
+
 int main(void) {
     // Set the version number for ProDOS
     *PROGRAM_VERSION_NUMBER_LOCATION = 0x01;
@@ -132,5 +138,24 @@ int main(void) {
     
     varargs_tests();
     __getchar();
+
+    srand(*((unsigned int *) 0x4e));
+    // Read from the BSS at random locations
+    for (int i = 0; i < 10; i++) {
+        int index = rand() % 1000;
+        print_hex_word(BULLSHIT_BSS[index]);
+    }
+    // Initialize the BSS to random values
+    for (int i = 0; i < 1000; i++) {
+        BULLSHIT_BSS[i] = rand();
+    }
+    // Read from the BSS at random locations again
+    for (int i = 0; i < 10; i++) {
+        int index = rand() % 1000;
+        print_hex_word(BULLSHIT_BSS[index]);
+    }
+
+    __getchar();
+
     return 0; 
 }
