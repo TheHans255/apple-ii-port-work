@@ -6,19 +6,26 @@
  */
 MEMORY { 
     ram (rw) : ORIGIN = 0x2000, LENGTH = 0x9F00
-    zp : ORIGIN = 0x0050, LENGTH = 0x00AF
 }
-SECTIONS { INCLUDE c.ld }
 
-__stack = 0x1fff;
+
 
 /* Use the first 32 bytes of zero page as imaginary registers.
  * Note that 0x20 thru 0x4F are used by the System Monitor
  * and ProDOS.
  */
-__rc0 = 0x00;
+__rc0 = 0x0000;
 INCLUDE imag-regs.ld
 ASSERT(__rc0 == 0x00, "Inconsistent zero page map.")
 ASSERT(__rc31 == 0x1f, "Inconsistent zero page map.")
+
+MEMORY { zp : ORIGIN = 0x0060, LENGTH = 0x0050 }
+
+SECTIONS {
+    INCLUDE c.ld
+}
+
+/* Set the operand stack to the 6K memory region behind our program */
+__stack = 0x1fff;
 
 OUTPUT_FORMAT { TRIM(ram) }
