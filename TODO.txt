@@ -13,10 +13,13 @@ HIGH PRIORITY:
     that you may need to do this as part of adding your platform to the SDK.
 - Fill the system bitmap. You will need an extra _init library that does this
   with the program's current size and with the stack section.
+  - Note that we _can't_ just fill the whole thing. The bitmap is also
+    used by ProDOS itself to allocate file buffers.
 
 MID PRIORITY:
 
-- Get more stdlib input to work (in particular, get getchar() to work)
+- Get more stdlib input to work (in particular, the input function should be
+  getchar(), not __getchar())
 - Come up with a mechanism for dynamically assembling ProDOS syscalls
   - Because the byte and word for syscall parameters is expected to immediately
     follow the JSR $BF00 instruction, but the parameter pointers are expected
@@ -25,16 +28,21 @@ MID PRIORITY:
     (likely with an RTS at the end).
   - You could probably do this with a global, but you could also create locals
     each time. Test what the compiler does with this information.
-- Write stdlib implementations for the following functions:
-  - open()
-  - creat()
-  - read()
-  - write()
-  - fstat() (or some variety thereof)
-  - close()
-  - opendir()
-  - readdir()
-  - closedir()
+- Write some functions that map to ProDOS file access calls, in order to have
+  access to the disk.
+  - These should be separate from true stdio calls, which will happen later.
+  - (You probably should consider your SDK pull request experimental until
+     you find a way to hide these functions.)
+- Nail down exactly how the ProDOS bitmap is supposed to interact with our programs
+  - Question: Does the ProDOS MLI automatically set our OPEN buffers for us,
+    or do we need to set them ourselves?
+  - Question: When we read files, does the file read buffer have to be marked as
+    unprotected in the bitmap?
+  - Question: If an io_buffer is marked as allocated, does that memory become
+    protected? Does anything adverse happen if _we_ mark that area as protected?
+  - Combine the answers to these questions to figure out what needs to happen
+    to malloc() as additional memory is allocated, and/or if it's safe to allocate
+    buffers and then read to them.
 
 LOW PRIORITY:
 
@@ -47,13 +55,23 @@ LOW PRIORITY:
   - Be sure to include the HIRES pages in the bitmap, and also ensure, as part of your copy routine,
     that /RAM has the two 8K files written to it to protect HIRES during auxilliary memory
     accesses.
-- Write an implementation of morecore()
-  - morecore() should use the system bitmap, as well as a sort of "round robin" pointer search
-    strategy, to locate a suitable open page of memory. It will always return a segment
-    that is a multiple of 256 bytes.
-  - Write another function that can relinquish the core back to ProDOS.
-  - (Note: Figure out what these functions are called so that you can drop in a malloc()
-    implementation, though it may well be better to write these in anticipation of an arena allocator).
+- Write an alternate version of malloc() that uses the system bitmap (if needed)
+  - There is already a simple malloc() implementation available in the common target
+    (https://github.com/llvm-mos/llvm-mos-sdk/blob/f5a0fa476d80bd8d4b837def49528bc28ba4ea71/mos-platform/common/c/new.cc#L329),
+    but it is likely you will need to write your own/modify what's here.
+    Specifically, instead of assuming that the entire heap is available at our disposal,
+    we should follow the lead of the allocator in K&R C and request more memory
+    (through the morecore() function we previously wrote) as needed.
+- Write the main stdio input/output functions (e.g. fgetc, fputc), based on ProDOS files.
+  - stdio reference: https://cplusplus.com/reference/cstdio/
+  - Put together the FILE struct you wish to use.
+    Be sure to have points for stdin and stdout
+  - Also include the appropriate constants/macros based on ProDOS's limits
+    (e.g. up to 8 open files at once).
+  - Note that a complicating factor is that not only do you want to use the Apple's builtin
+    monitor for stdout, you would also like to support I/O redirection (such as to
+    a printer) if it was set by an outside source. Of course, that second part might not
+    be required (because ProDOS doesn't actually support output redirection)
 
 WHEN YOU'RE READY:
 - Include your port in the LLVM-MOS SDK (https://llvm-mos.org/wiki/Extending_SDK).

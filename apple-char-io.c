@@ -22,6 +22,6 @@ char __chrin() {
     return c;
 }
 
-char __getchar() {
+char getchar() {
     return __chrin();
 }
