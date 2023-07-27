@@ -11,16 +11,42 @@ HIGH PRIORITY:
     - exit-custom (for ProDOS QUIT)
   - It's quite possible, according to the "Extending_SDK" entry in the wiki,
     that you may need to do this as part of adding your platform to the SDK.
-- Fill the system bitmap. You will need an extra _init library that does this
-  with the program's current size and with the stack section.
-  - Note that we _can't_ just fill the whole thing. The bitmap is also
-    used by ProDOS itself to allocate file buffers.
+- (DONE) Nail down exactly how the ProDOS bitmap is supposed to interact with our programs
+  - Question: Does the ProDOS MLI automatically set our OPEN buffers for us,
+    or do we need to set them ourselves?
+    - Answer: We need to set them ourselves. ProDOS will automatically mark
+      that region as protected when a file is opened, and will clear it for us
+      when the file is cleared.
+  - Question: When we read files, does the file read buffer have to be marked as
+    unprotected in the bitmap?
+    - Answer: Yes! If we try to protect some memory, then read file contents to it,
+      we get error $56 (Bad Buffer Address).
+  - Question: If an io_buffer is marked as allocated, does that memory become
+    protected? Does anything adverse happen if _we_ mark that area as protected?
+    - Answer: Yes, ProDOS will protect it, and will unprotect it when freed.
+  - Combine the answers to these questions to figure out what needs to happen
+    to malloc() as additional memory is allocated, and/or if it's safe to allocate
+    buffers and then read to them.
+    - Answer: In general, the bitmap is only really used as a failsafe to
+      prevent DOS from overwriting itself or other data. We should only use it to
+      protect readonly data that would be catastrophic for a DOS command to
+      overwrite (such as our user program), and should not use it to protect
+      writable data. Once we set the system bitmap at the start of the program,
+      I'm pretty sure we can ignore it.
+    - Before we start allocating dynamic memory, we need a memory space
+      set aside for allocating ProDOS IO buffers. There can be up to 8 buffers,
+      each of which is 1K and must be page aligned. A likely space for this is the
+      6K below $2000, though this only allows 6 open files at a time.
+    - After we start allocating dynamic memory, we do not need to write to the
+      bitmap as we take more core space. We should, however, have a memory
+      allocator interface that can snag 4 consecutively aligned pages at a time
+      that the stdio file system can call directly.
 
 MID PRIORITY:
 
-- Get more stdlib input to work (in particular, the input function should be
-  getchar(), not __getchar())
-- Come up with a mechanism for dynamically assembling ProDOS syscalls
+- Get more stdlib input to work 
+  - (DONE) (In particular, the input function should be getchar(), not __getchar())
+- (DONE) Come up with a mechanism for dynamically assembling ProDOS syscalls
   - Because the byte and word for syscall parameters is expected to immediately
     follow the JSR $BF00 instruction, but the parameter pointers are expected
     to change as you, say, do lots of read() and write() calls, you will need
@@ -28,21 +54,22 @@ MID PRIORITY:
     (likely with an RTS at the end).
   - You could probably do this with a global, but you could also create locals
     each time. Test what the compiler does with this information.
+  - (You did this by creating a global syscall gadget in assembly, intended to be
+    used only by the syscall abstraction layer. Not the ideal solution, since the
+    gadget is also potentially exposed to user code, but not horrible either.)
+  - (Side note: since the calling convention is such that you can safely just call
+    the gadget as if it were a C function pointer, you could probably assemble
+    it dynamically, too. Only do this if you need potential thread safety, though.)
 - Write some functions that map to ProDOS file access calls, in order to have
   access to the disk.
   - These should be separate from true stdio calls, which will happen later.
   - (You probably should consider your SDK pull request experimental until
      you find a way to hide these functions.)
-- Nail down exactly how the ProDOS bitmap is supposed to interact with our programs
-  - Question: Does the ProDOS MLI automatically set our OPEN buffers for us,
-    or do we need to set them ourselves?
-  - Question: When we read files, does the file read buffer have to be marked as
-    unprotected in the bitmap?
-  - Question: If an io_buffer is marked as allocated, does that memory become
-    protected? Does anything adverse happen if _we_ mark that area as protected?
-  - Combine the answers to these questions to figure out what needs to happen
-    to malloc() as additional memory is allocated, and/or if it's safe to allocate
-    buffers and then read to them.
+  - (You have done open, read, write, and close thus far. You should add newline options,
+    create, and delete at minimum)
+  - (Also test text files created from official Apple disks. Is the high bit set
+    in the ASCII of these files?)
+
 
 LOW PRIORITY:
 
@@ -55,13 +82,18 @@ LOW PRIORITY:
   - Be sure to include the HIRES pages in the bitmap, and also ensure, as part of your copy routine,
     that /RAM has the two 8K files written to it to protect HIRES during auxilliary memory
     accesses.
-- Write an alternate version of malloc() that uses the system bitmap (if needed)
-  - There is already a simple malloc() implementation available in the common target
-    (https://github.com/llvm-mos/llvm-mos-sdk/blob/f5a0fa476d80bd8d4b837def49528bc28ba4ea71/mos-platform/common/c/new.cc#L329),
-    but it is likely you will need to write your own/modify what's here.
-    Specifically, instead of assuming that the entire heap is available at our disposal,
-    we should follow the lead of the allocator in K&R C and request more memory
-    (through the morecore() function we previously wrote) as needed.
+- Write an interface to malloc() (perhaps forking the builtin malloc()) that can fetch
+  and properly allocate memory for IO buffers.
+  - IO buffers must be marked protected by ProDOS and be page aligned, while read buffers
+    must remain unprotected when read. This means that we should not use the system bitmap
+    for general allocation operations.
+  - Have a function in the malloc() package that guarantees allocation of some whole number
+    of consecutive pages. (This should likely be the same as malloc(), just with the page
+    alignment concern - this would allow the buffer to be easily freed by free()).
+  - (CONSIDER: Move the stack to $BEFF. Begin with two heap areas: the 6K below $2000, and
+    the space after BSS.)
+  - (Note that the main purpose of doing this is to avoid allocating up to 8K of wasted
+    buffer space while files are not actually being read).
 - Write the main stdio input/output functions (e.g. fgetc, fputc), based on ProDOS files.
   - stdio reference: https://cplusplus.com/reference/cstdio/
   - Put together the FILE struct you wish to use.

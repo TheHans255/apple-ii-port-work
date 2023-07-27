@@ -1,28 +1,47 @@
 #include <stdio.h>
+#include "prodos-syscall.h"
 
 char *PROGRAM_VERSION_NUMBER_LOCATION = (char *) 0xbffd;
-char *SYSTEM_BITMAP_LOCATION = (char *) 0xbf58;
+volatile char *SYSTEM_BITMAP_LOCATION = (char *) 0xbf58;
 
 static void print_system_bitmap() {
     // This program prints what's already in it so that we can inspect it
-    for (unsigned int i = 0; i < 24; i++) {
-        unsigned char bitmap = SYSTEM_BITMAP_LOCATION[i];
-        printf("%04x: %02x\n", i * 0x800, bitmap);
-        getchar();
+    for (unsigned int i = 0; i < 24; i += 2) {
+        unsigned char bitmap1 = SYSTEM_BITMAP_LOCATION[i];
+        unsigned char bitmap2 = SYSTEM_BITMAP_LOCATION[i + 1];
+        printf("%04x: %02x%02x\n", i * 0x800, bitmap1, bitmap2);
     }
 }
 
-static void print_fibonacci() {
-    unsigned long a = 0;
-    unsigned long b = 1;
-    printf("%ld\n", a);
-    printf("%ld\n", b);
-    for (int i = 0; i < 30; i++) {
-        unsigned long c = a + b;
-        printf("%ld\n", c);
-        a = b;
-        b = c; 
+static void test_file_apis() {
+    // NOTE: Normal ASCII is acceptable, but the string must be length-prefixed with a single byte
+    // (Also, max pathnames are 64 characters)
+    const char PATHNAME[] = {12, 'T', 'E', 'S', 'T', 'T', 'E', 'X', 'T', '.', 'T', 'X', 'T'};
+    printf("Memory map before opening files:\n");
+    print_system_bitmap();
+    char ref_num;
+    char error;
+    if ((error = prodos_open((char *) PATHNAME, (char *) 0x6000, &ref_num))) {
+        printf("Error opening: $%x\n", error);
+        return;
     }
+    printf("File opened with reference number %d\n", ref_num);
+    char read_buffer[128];
+    unsigned int read_count;
+    if ((error = prodos_read(ref_num, read_buffer, 120, &read_count))) {
+        printf("Error reading: $%x\n", error);
+        return;
+    }
+    read_buffer[read_count] = '\0';
+    printf("%s\n", read_buffer);
+    getchar();
+    printf("Memory map after reading, before closing:\n");
+    print_system_bitmap();
+    getchar();
+    prodos_close(ref_num);
+    printf("Memory map after closing:\n");
+    print_system_bitmap();
+    getchar();
 }
 
 static unsigned long next = 1;
@@ -49,10 +68,13 @@ int main(void) {
     //    where to allocate values.
     // 3. If we enable the HIRES graphics pages - simply black out those bits
     //    and also ensure that /RAM is protected.
+
+    // Protect the stack
+    SYSTEM_BITMAP_LOCATION[1] = 0xff;
+    SYSTEM_BITMAP_LOCATION[2] = 0xff;
+    SYSTEM_BITMAP_LOCATION[3] = 0xff;
     
-    print_fibonacci();
-    getchar();
-    print_system_bitmap();
+    test_file_apis();
     getchar();
 
     return 0; 
