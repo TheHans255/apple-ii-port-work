@@ -21,6 +21,7 @@ extern void *_prodos_syscall_param;
 // code if there is an error.
 extern char _prodos_syscall(void);
 
+#define PRODOS_SYSCALL_QUIT 0x65
 #define PRODOS_SYSCALL_CREATE 0xC0
 #define PRODOS_SYSCALL_DESTROY 0xC1
 #define PRODOS_SYSCALL_RENAME 0xC2

@@ -2,7 +2,7 @@ TODO for Apple //e LLVM-MOS port:
 
 HIGH PRIORITY:
 
-- Add a CMakeLists.txt file that automatically bundles all of the common libraries you need.
+- (DONE) Add a CMakeLists.txt file that automatically bundles all of the common libraries you need.
   - Your current command is: "/path/to/mos-common-clang -Os -o output/hello.sys main.c apple-char-io.c prodos-exit.S -lexit-custom -linit-stack -lzero-bss"
   - Figure out how your CMakeLists file will get recognized at a program level.
   - Use https://github.com/llvm-mos/llvm-mos-sdk/blob/f5a0fa476d80bd8d4b837def49528bc28ba4ea71/mos-platform/sim/CMakeLists.txt as a reference.
@@ -11,6 +11,9 @@ HIGH PRIORITY:
     - exit-custom (for ProDOS QUIT)
   - It's quite possible, according to the "Extending_SDK" entry in the wiki,
     that you may need to do this as part of adding your platform to the SDK.
+  - (Done! Note that you still need two commands to actually use your CMake configuration:)
+    - cmake -D CMAKE_C_COMPILER="/path/to/mos-common-clang" -S src -B output (when creating your output directory)
+    - make -C output (to actually build)
 - (DONE) Nail down exactly how the ProDOS bitmap is supposed to interact with our programs
   - Question: Does the ProDOS MLI automatically set our OPEN buffers for us,
     or do we need to set them ourselves?

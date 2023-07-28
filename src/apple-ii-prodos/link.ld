@@ -29,5 +29,4 @@ SECTIONS {
 
 OUTPUT_FORMAT { 
     TRIM(ram)
-    SHORT(__stack)
 }

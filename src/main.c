@@ -68,11 +68,6 @@ int main(void) {
     //    where to allocate values.
     // 3. If we enable the HIRES graphics pages - simply black out those bits
     //    and also ensure that /RAM is protected.
-
-    // Protect the stack
-    SYSTEM_BITMAP_LOCATION[1] = 0xff;
-    SYSTEM_BITMAP_LOCATION[2] = 0xff;
-    SYSTEM_BITMAP_LOCATION[3] = 0xff;
     
     test_file_apis();
     getchar();
