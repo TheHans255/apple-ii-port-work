@@ -66,6 +66,8 @@ MID PRIORITY:
 - Write some functions that map to ProDOS file access calls, in order to have
   access to the disk.
   - These should be separate from true stdio calls, which will happen later.
+  - Adjust for high-bit (native routines create text files with
+    the high bit _set_, while imported ASCII files have the high bit cleared)
   - (You probably should consider your SDK pull request experimental until
      you find a way to hide these functions.)
   - (You have done open, read, write, and close thus far. You should add newline options,
