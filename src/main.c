@@ -16,7 +16,8 @@ static void print_system_bitmap() {
 static void test_file_apis() {
     // NOTE: Normal ASCII is acceptable, but the string must be length-prefixed with a single byte
     // (Also, max pathnames are 64 characters)
-    const char PATHNAME[] = {12, 'T', 'E', 'S', 'T', 'T', 'E', 'X', 'T', '.', 'T', 'X', 'T'};
+    // const char PATHNAME[] = {12, 'T', 'E', 'S', 'T', 'T', 'E', 'X', 'T', '.', 'T', 'X', 'T'};
+    const char PATHNAME[] = {6, 'R', 'E', 'A', 'D', 'M', 'E'};
     printf("Memory map before opening files:\n");
     print_system_bitmap();
     char ref_num;
