@@ -9,7 +9,7 @@ void __chrout(char c) {
 
 void __putchar(char c) {
   if (__builtin_expect(c == '\n', 0)) c = '\r';
-  __chrout(c ^ -128);
+  __chrout(c | -128);
 }
 
 char __chrin() {
