@@ -1,5 +1,6 @@
 {
     "files.associations": {
         "stdio.h": "c"
-    }
+    },
+    "cmake.sourceDirectory": "/home/hans/Documents/DevSync/Projects/apple-ii-port-test/src"
 }

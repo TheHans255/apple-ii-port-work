@@ -19,7 +19,7 @@ extern void *_prodos_syscall_param;
 // Issues the ProDOS syscall specified by _prodos_syscall_number
 // and _prodos_syscall_param. Returns 0 if successful or an error
 // code if there is an error.
-extern char _prodos_syscall(void);
+extern __attribute__((leaf)) char _prodos_syscall(void);
 
 #define PRODOS_SYSCALL_QUIT 0x65
 #define PRODOS_SYSCALL_CREATE 0xC0
