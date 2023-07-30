@@ -1,6 +1,35 @@
 #include "prodos-syscall-core.h"
 #include "prodos-syscall.h"
 
+#define POWERUP_BYTE ((char *) 0x3f4)
+
+__attribute__((noreturn))
+void prodos_quit ()  {
+    // Before the actual _quit syscall,
+    // we need to invalidate the powerup byte.
+    // We also need to do any cleanup and close open files,
+    // but we will just assume this has already happened.
+    (*POWERUP_BYTE)--;
+
+    struct prodos_quit_param {
+        char param_count;
+        char quit_type;
+        void *reserved_1;
+        char reserved_2;
+        void *reserved_3;
+    } __attribute((packed)) p;
+    p.param_count = 4;
+    p.quit_type = 0;
+    p.reserved_1 = (void *) 0;
+    p.reserved_2 = 0;
+    p.reserved_3 = (void *) 0;
+    _prodos_syscall_number = PRODOS_SYSCALL_QUIT;
+    _prodos_syscall_param = (void *) &p;
+    _prodos_syscall();
+
+    __builtin_unreachable();
+}
+
 char prodos_open(char *pathname, char *io_buffer, char *ref_num) {
     struct prodos_open_param {
         char param_count;

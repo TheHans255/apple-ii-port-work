@@ -1,5 +1,6 @@
-void __chrout(char c) {
-    // Use COUT for character output
+#include "apple-ii-monitor.h"
+
+void appleii_cout(unsigned char c) {
     __attribute__((leaf)) asm volatile(
         "jsr\t0xfded" 
         : 
@@ -7,21 +8,11 @@ void __chrout(char c) {
         :);
 }
 
-void __putchar(char c) {
-  if (__builtin_expect(c == '\n', 0)) c = '\r';
-  __chrout(c | -128);
-}
-
-char __chrin() {
-    // Use RDCHAR for character input
+unsigned char appleii_rdchar() {
     char c;
     __attribute__((leaf)) asm volatile("jsr\t0xfd35" 
     : "=a" (c)
     : 
     : "a", "y", "p");
     return c;
-}
-
-char getchar() {
-    return __chrin();
 }

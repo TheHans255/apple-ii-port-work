@@ -62,6 +62,11 @@
 #define PRODOS_FILETYPE_RELOCATABLE_CODE_FILE 0xFE
 #define PRODOS_FILETYPE_SYSTEM_PROGRAM 0xFF
 
+// Exit to ProDOS immediately
+// This should only be called from _exit()
+__attribute__((noreturn))
+void prodos_quit(void);
+
 // Open a ProDOS file with the given pathname
 // pathname: The path to the file
 // io_buffer: A pointer to a buffer for input
