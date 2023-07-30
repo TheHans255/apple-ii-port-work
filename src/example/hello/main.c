@@ -57,18 +57,6 @@ void srand(unsigned int seed) {
 int main(void) {
     // Set the version number for ProDOS
     *PROGRAM_VERSION_NUMBER_LOCATION = 0x01;
-    // TODO: As our test confirms, set the system bitmap to signify the pages
-    // that you want to use. This should be done in two locations:
-    // 1. At the start of the program's bookkeeping (next to setting the version number).
-    //    The program needs to have material access to the value of _end
-    //    in order to set page values (though note that we need to start from
-    //    0x800, since we're using that for our stack), and it also needs to
-    //    include uninitialized static variables.
-    // 2. During calls to morecore(). If we end up writing some sort of dynamic
-    //    memory allocator, it should consult with the ProDOS bitmap to figure out
-    //    where to allocate values.
-    // 3. If we enable the HIRES graphics pages - simply black out those bits
-    //    and also ensure that /RAM is protected.
     
     test_file_apis();
     getchar();

@@ -16,3 +16,11 @@ unsigned char appleii_rdchar() {
     : "a", "y", "p");
     return c;
 }
+
+void appleii_vtab(unsigned char line_number) {
+    __attribute__((leaf)) asm volatile(
+        "jsr\t0xfb5b" 
+        : 
+        : "a" (line_number)
+        :);
+}
