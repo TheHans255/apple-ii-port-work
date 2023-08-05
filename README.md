@@ -18,11 +18,11 @@ to the Apple //e as a build target.
 ## Build Steps
 
 1. When you first clone the repository, or change any of the CMake files, execute
-   `$ cmake -D CMAKE_C_COMPILER="/path/to/mos-common-clang" -S src -B output` in the root of the repository,
+   `$ cmake -D CMAKE_C_COMPILER="/path/to/mos-common-clang" -S src -B build` in the root of the repository,
    where `/path/to/mos-common-clang` is the path to `mos-common-clang` in your LLVM-MOS SDK installation.
 2. Using your Apple disk image manipulation program, add `testtext.txt` to the root of your ProDOS disk
-3. For each change, execute `$ make -C output` from the root of the repository
-4. Using your disk image manipulation program, add `output/hello.sys` to the root of your
+3. For each change, execute `$ make -C build` from the root of the repository
+4. Using your disk image manipulation program, add `build/example/hello/hello.sys` to the root of your
    ProDOS disk. (Be sure to delete any previous `hello.sys` first).
 5. Load the disk in the emulator (or transfer it to the real device), boot it,
    and select `HELLO.SYS` in the menu.

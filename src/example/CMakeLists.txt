@@ -1,2 +1,2 @@
 add_subdirectory(hello)
-add_subdirectory(paddle-read)
+add_subdirectory(paddle-read-advanced)
