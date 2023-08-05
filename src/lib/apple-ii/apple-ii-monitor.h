@@ -1,10 +1,16 @@
 #ifndef __APPLE_II_MONITOR
 #define __APPLE_II_MONITOR
 
-#define APPLEII_MONITOR_WNDLFT ((volatile unsigned char *) 0x20);
-#define APPLEII_MONITOR_WNDWDTH ((volatile unsigned char *) 0x21);
-#define APPLEII_MONITOR_WNDTOP ((volatile unsigned char *) 0x22);
-#define APPLEII_MONITOR_WNDBTM ((volatile unsigned char *) 0x23);
+// The top of the text window. Should range from 0 to 39 inclusive
+#define APPLEII_MONITOR_WNDLFT ((volatile unsigned char *) 0x20)
+// The width of the text window. This plus WNDLFT
+// should not exceed 40.
+#define APPLEII_MONITOR_WNDWDTH ((volatile unsigned char *) 0x21)
+// The top line of the text window. Should range from 0 to 23 inclusive.
+#define APPLEII_MONITOR_WNDTOP ((volatile unsigned char *) 0x22)
+// The bottom line of the text window. Should range from 0 to 23 inclusive
+// and should not be less than WNDTOP
+#define APPLEII_MONITOR_WNDBTM ((volatile unsigned char *) 0x23)
 // The horizontal location of the current character in video output
 // (stored as a displacement from the left edge of the text window)
 #define APPLEII_MONITOR_CH ((volatile unsigned char *) 0x24)
@@ -20,7 +26,7 @@
 #define APPLEII_MONITOR_H2 ((volatile unsigned char *) 0x2c)
 // Second horizontal coordinate used for VLINE
 // (set automatically by appleii_hline)
-#define APPLEII_MONITOR_V2 ((volatile unsigned char *) 0x2c)
+#define APPLEII_MONITOR_V2 ((volatile unsigned char *) 0x2d)
 // LORES color mask (set by SETCOL)
 #define APPLEII_MONITOR_COLOR ((volatile unsigned char *) 0x30)
 // Prompt character used by GETLN
@@ -150,10 +156,10 @@ unsigned char appleii_read(unsigned char *dest_start, unsigned char *dest_end);
 unsigned char appleii_write(unsigned char *src_start, unsigned char *src_end);
 
 // The 16 colors available in LORES graphics
-enum appleii_lores_color { BLACK, MAGENTA, DARK_BLUE, PURPLE,
-  DARK_GREEN, GREY_1, MEDIUM_BLUE, LIGHT_BLUE,
-  BROWN, ORANGE, GREY_2, PINK,
-  LIGHT_GREEN, YELLOW, AQUAMARINE, WHITE };
+enum appleii_lores_color { LORES_BLACK, LORES_MAGENTA, LORES_DARK_BLUE, LORES_PURPLE,
+  LORES_DARK_GREEN, LORES_GREY_1, LORES_MEDIUM_BLUE, LORES_LIGHT_BLUE,
+  LORES_BROWN, LORES_ORANGE, LORES_GREY_2, LORES_PINK,
+  LORES_LIGHT_GREEN, LORES_YELLOW, LORES_AQUAMARINE, LORES_WHITE };
 
 // SETCOL: Set the color for future LORES graphics operations
 void appleii_setcol(enum appleii_lores_color color);

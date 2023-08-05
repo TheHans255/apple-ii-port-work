@@ -12,60 +12,60 @@
 // In this set, a character with its high bit cleared is
 // the INVERSE version of the same character with the high
 // bit set - FLASHING is removed.
-#define APPLEIIE_ALTCHARSET_ON ((volatile void *) 0xC00F)
+#define APPLEIIE_ALTCHARSET_ON ((volatile char *) 0xC00F)
 // Turns off the Apple //e alternate character set -
 // the lower 128 characters is INVERSE and FLASHING
 // uppercase characters.
-#define APPLEIIE_ALTCHARSET_OFF ((volatile void *) 0xC00E)
+#define APPLEIIE_ALTCHARSET_OFF ((volatile char *) 0xC00E)
 // Reads the current state of the alternate character set switch
 #define APPLEIIE_ALTCHARSET_READ ((volatile char *) 0xC01E)
 // Disables graphics and displays full-screen text
-#define APPLEII_TEXTMODE_TEXT ((volatile void *) 0xC051)
+#define APPLEII_TEXTMODE_TEXT ((volatile char *) 0xC051)
 // Enables graphics
-#define APPLEII_TEXTMODE_GRAPHICS ((volatile void *) 0xC050)
+#define APPLEII_TEXTMODE_GRAPHICS ((volatile char *) 0xC050)
 // Reads the current state of the text switch
 // (high bit set = text, low bit set = graphics)
 #define APPLEIIE_TEXTMODE_READ ((volatile char *) 0xC01A)
 // Turns on the Apple II mixed mode - when graphics mode
 // is enabled, the lower 4 lines of text will still appear.
 // (This switch has no effect when graphics are disabled)
-#define APPLEII_MIXEDMODE_ON ((volatile void *) 0xC053)
+#define APPLEII_MIXEDMODE_ON ((volatile char *) 0xC053)
 // Turns off the Apple II mixed mode - any active graphics mode
 // will take up the entire screen
-#define APPLEII_MIXEDMODE_OFF ((volatile void *) 0xC052)
+#define APPLEII_MIXEDMODE_OFF ((volatile char *) 0xC052)
 // Reads the current state of the mixed mode switch
 #define APPLEIIE_MIXEDMODE_READ ((volatile char *) 0xC01B)
 // Enables Page 2 - all graphics and text will be taken
 // from the alternate second page.
 // If the 80STORE flag is set to AUX, this switch instead
 // sets memory access to the buffers in the 80-column text card
-#define APPLEII_PAGE_PAGE2 ((volatile void *) 0xC055)
+#define APPLEII_PAGE_PAGE2 ((volatile char *) 0xC055)
 // Enables Page 1 - all graphics and text will be taken
 // from the default first page.
-#define APPLEII_PAGE_PAGE1 ((volatile void *) 0xC054)
+#define APPLEII_PAGE_PAGE1 ((volatile char *) 0xC054)
 // Reads the current state of the page switch
 #define APPLEIIE_PAGE_READ ((volatile char *) 0xC01C)
 // Enables the Apple II HIRES graphics mode
-#define APPLEII_HIRES_ON ((volatile void *) 0xC055)
+#define APPLEII_HIRES_ON ((volatile char *) 0xC055)
 // Disables the Apple II HIRES graphics mode
 // (LORES graphics are displayed instead)
-#define APPLEII_HIRES_OFF ((volatile void *) 0xC054)
+#define APPLEII_HIRES_OFF ((volatile char *) 0xC054)
 // Reads the current state of the HIRES switch
 #define APPLEIIE_HIRES_READ ((volatile char *) 0xC01D)
 // Enables 80-column display on the Apple //e
-#define APPLEIIE_80COLUMN_ON ((volatile void *) 0xC00D)
+#define APPLEIIE_80COLUMN_ON ((volatile char *) 0xC00D)
 // Disables 80-column display on the Apple //e
-#define APPLEIIE_80COLUMN_OFF ((volatile void *) 0xC00C)
+#define APPLEIIE_80COLUMN_OFF ((volatile char *) 0xC00C)
 // Reads the current state of the 80-column switch
 #define APPLEIIE_80COLUMN_READ ((volatile char *) 0xC01F)
 // Enables storing to the 80-column card auxillary memory
 // on the Apple //e
-#define APPLEIIE_80STORE_AUX ((volatile void *) 0xC001)
+#define APPLEIIE_80STORE_AUX ((volatile char *) 0xC001)
 // Disables storing to the 80-column card auxillary memory
 // on the Apple //e.
 // (Note that this is write-only - reading this address
 // yields keyboard data)
-#define APPLEIIE_80STORE_MAIN ((volatile void *) 0xC000)
+#define APPLEIIE_80STORE_MAIN ((volatile char *) 0xC000)
 // Reads the current state of the 80STORE switch
 #define APPLEIIE_80STORE_READ ((volatile char *) 0xC018)
 // Reads the current state of VBlank on the Apple //e
@@ -73,21 +73,21 @@
 #define APPLEIIE_VBLANK ((volatile char *) 0xC019)
 
 // Turns the Annunciator 0 output off
-#define APPLEII_ANNUNCIATOR0_OFF ((volatile void *) 0xC058)
+#define APPLEII_ANNUNCIATOR0_OFF ((volatile char *) 0xC058)
 // Turns the Annunciator 0 output on
-#define APPLEII_ANNUNCIATOR0_ON ((volatile void *) 0xC059)
+#define APPLEII_ANNUNCIATOR0_ON ((volatile char *) 0xC059)
 // Turns the Annunciator 1 output off
-#define APPLEII_ANNUNCIATOR1_OFF ((volatile void *) 0xC05A)
+#define APPLEII_ANNUNCIATOR1_OFF ((volatile char *) 0xC05A)
 // Turns the Annunciator 1 output on
-#define APPLEII_ANNUNCIATOR1_ON ((volatile void *) 0xC05B)
+#define APPLEII_ANNUNCIATOR1_ON ((volatile char *) 0xC05B)
 // Turns the Annunciator 2 output off
-#define APPLEII_ANNUNCIATOR2_OFF ((volatile void *) 0xC05C)
+#define APPLEII_ANNUNCIATOR2_OFF ((volatile char *) 0xC05C)
 // Turns the Annunciator 2 output on
-#define APPLEII_ANNUNCIATOR2_ON ((volatile void *) 0xC05D)
+#define APPLEII_ANNUNCIATOR2_ON ((volatile char *) 0xC05D)
 // Turns the Annunciator 3 output off
-#define APPLEII_ANNUNCIATOR3_OFF ((volatile void *) 0xC05E)
+#define APPLEII_ANNUNCIATOR3_OFF ((volatile char *) 0xC05E)
 // Turns the Annunciator 3 output on
-#define APPLEII_ANNUNCIATOR3_ON ((volatile void *) 0xC05F)
+#define APPLEII_ANNUNCIATOR3_ON ((volatile char *) 0xC05F)
 
 // Clicks the Apple II speaker
 #define APPLEII_SPEAKER_OUT ((volatile char *) 0xC030)

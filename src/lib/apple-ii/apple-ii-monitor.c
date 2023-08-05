@@ -44,7 +44,7 @@ void appleii_setinv() { __attribute__((leaf)) asm volatile ("jsr 0xfe80": : : "y
 
 void appleii_setnorm() { __attribute__((leaf)) asm volatile ("jsr 0xfe84": : : "y"); }
 
-void appleii_vtab(unsigned char line_number) { __attribute__((leaf)) asm volatile ("jsr 0xfc24": : "a" (line_number) :); }
+void appleii_vtab(unsigned char line_number) { __attribute__((leaf)) asm volatile ("jsr 0xfb5b": : "a" (line_number) :); }
 
 unsigned char appleii_rdkey() { 
     unsigned char c;
@@ -85,7 +85,7 @@ void appleii_setpwrc() { __attribute__((leaf)) asm volatile ("jsr 0xfb6f": : : "
 
 unsigned char appleii_pread(unsigned char index) {
     unsigned char result;
-    __attribute__((leaf)) asm volatile ("jsr 0xfb1e": "=y" (result) : "x" (index) : "a");
+    __attribute__((leaf)) asm volatile ("jsr 0xfb1e": "=y" (result) : "x" (index) : "a", "p");
     return result; 
 }
 
@@ -108,7 +108,7 @@ void appleii_setcol(enum appleii_lores_color color) {
 
 void appleii_nextcol() { __attribute__((leaf)) asm volatile ("jsr 0xf85f": : :); }
 
-void appleii_plot(unsigned char x, unsigned char y) { __attribute__((leaf)) asm volatile ("jsr 0xf800": : "a" (y), "y" (x) :); }
+void appleii_plot(unsigned char x, unsigned char y) { __attribute__((leaf)) asm volatile ("jsr 0xf800": : "a" (y), "y" (x) : "a"); }
 
 void appleii_hline(unsigned char x1, unsigned char x2, unsigned char y) { 
     *APPLEII_MONITOR_H2 = x2;
