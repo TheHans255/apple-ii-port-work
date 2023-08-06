@@ -8,27 +8,6 @@
 // is used to account for the difference in execution speed,
 // and the sound functions are improved.
 
-// VARIABLE NOTES:
-// A$: Player Name
-// B$: Y/N Buffer
-// A: Background Color
-// B: Even Brick Color
-// C: Odd Brick Color
-// D: Paddle Color
-// E: Ball Color
-// I: (Temporary Iterator Variable)
-// J: (Temporary Iterator Variable)
-// L: Balls Left
-// M: (Dummy Variable for Speaker PEEK)
-// N: Number of Ball Hits Per Round
-// P: (Paddle Vertical Previous Position) (not used)
-// Q: Paddle Vertical Position
-// S: Score
-// V: Ball X Velocity
-// W: Ball Y Velocity (divided by 3)
-// X: Ball X Position
-// Y: Ball Y Position (divided by 3)
-
 int rand();
 void srand(int);
 
@@ -47,7 +26,7 @@ unsigned int player_score = 0;
 unsigned char balls_remaining = 0;
 unsigned char paddle_y = 0;
 unsigned int ball_hits_in_round = 0;
-unsigned char time_until_serve = 0;
+unsigned char time_until_ball_active = 0;
 signed char ball_x = 0;
 signed char ball_y = 0;
 signed char ball_dx = 0;
@@ -89,22 +68,21 @@ void reset_round() {
     ball_y = rand() % 120;
     ball_dx = -1;
     ball_dy = (rand() % 5) - 2;
-    *APPLEII_MONITOR_CH = 6;
+    *APPLEII_MONITOR_CH = 5;
     if (balls_remaining > 1) {
         printf("BALLS LEFT: %d\n", balls_remaining);
     } else {
         printf("LAST BALL!   \n");
     }
-    time_until_serve = 60;
+    time_until_ball_active = 60;
+    ball_hits_in_round = 0;
 }
 
 void update_paddle() {
-    // signed int paddle_y_raw = ((signed int) appleii_pread(0) - 20) / 6;
-    // if (paddle_y_raw < 0) paddle_y_raw = 0;
-    // if (paddle_y_raw > 34) paddle_y_raw = 34;
-    // paddle_y = (unsigned char) paddle_y_raw;
-    paddle_y++;
-    if (paddle_y > 34) paddle_y = 0;
+    signed int paddle_y_raw = ((signed int) appleii_pread(0) - 20) / 6;
+    if (paddle_y_raw < 0) paddle_y_raw = 0;
+    if (paddle_y_raw > 34) paddle_y_raw = 34;
+    paddle_y = (unsigned char) paddle_y_raw;
 
     appleii_setcol(PADDLE_COLOR);
     appleii_vline(0, paddle_y, paddle_y + 5);
@@ -124,7 +102,7 @@ void update_ball() {
     appleii_setcol(BACKGROUND_COLOR);
 
     ball_y += ball_dy;
-    if (ball_y < 0 || ball_y > 120) {
+    if (ball_y < 0 || ball_y >= 120) {
         ball_y = old_ball_y;
         ball_dy = -ball_dy;
         // TODO: play bump sound
@@ -139,21 +117,23 @@ void update_ball() {
         ball_dx = -ball_dx;
         // TODO: play bump sound
     } else {
-        enum appleii_lores_color ball_pos_color = appleii_scrn(ball_x, ball_y / 3);
+        unsigned char ball_screen_x = ball_x;
+        unsigned char ball_screen_y = ball_y / 3;
+        enum appleii_lores_color ball_pos_color = appleii_scrn(ball_screen_x, ball_screen_y);
         if (ball_pos_color == BACKGROUND_COLOR) {
             // do nothing
         } else if (ball_x == 0) {
             // must be a paddle hit
             ball_hits_in_round++;
             ball_dx = (ball_hits_in_round > 5) + 1;
-            ball_dy = ((ball_y / 3) - paddle_y) * 2 - 5;
+            ball_dy = (ball_screen_y - paddle_y) * 2 - 5;
         } else {
             // must be a block hit
-            ball_dy = -ball_dy;
-            appleii_vline(ball_x, ball_y / 6 * 2, ball_y / 6 * 2 + 1);
+            ball_dx = -ball_dx;
+            appleii_vline(ball_x, ball_screen_y & 0xfe, (ball_screen_y & 0xfe) + 1);
             player_score += ball_x / 2 - 9;
-            *APPLEII_MONITOR_CH = 13;
-            appleii_vtab(21);
+            appleii_vtab(20);
+            *APPLEII_MONITOR_CH = 12;
             printf("%3d\n", player_score);
             // TODO: play block hit sound
         }
@@ -186,21 +166,21 @@ void main_loop() {
     setup_graphics_mode();
     appleii_vtab(20);
     appleii_setcol(BACKGROUND_COLOR);
-    for (unsigned char i = 0; i < 39; i++) {
+    for (unsigned char i = 0; i <= 39; i++) {
         appleii_vline(i, 0, 39);
     }
-    for (unsigned char i = 20; i < 34; i += 2) {
+    for (unsigned char i = 20; i <= 34; i += 2) {
         *APPLEII_MONITOR_CH = i + 1;
         printf("%d", i / 2 - 9);
         appleii_setcol(EVEN_BRICK_COLOR);
         appleii_vline(i, 0, 39);
         appleii_setcol(ODD_BRICK_COLOR);
-        for (unsigned char j = i % 4; j < 39; j += 4) {
+        for (unsigned char j = i % 4; j <= 39; j += 4) {
             appleii_vline(i, j, j+1);
         }
     }
-    *APPLEII_MONITOR_CH = 5;
-    printf("SCORE =0\n\n\n");
+    *APPLEII_MONITOR_CH = 4;
+    printf("SCORE =0\n\n");
     *APPLEII_MONITOR_WNDTOP = 21;
 
     player_score = 0;
@@ -216,9 +196,10 @@ void main_loop() {
             break;
         }
         update_paddle();
-        if (time_until_serve > 0) {
-            time_until_serve--;
+        if (time_until_ball_active > 0) {
+            time_until_ball_active--;
         } else {
+            time_until_ball_active = 3;
             update_ball();
         }
         wait_for_vblank();
@@ -228,7 +209,7 @@ void main_loop() {
 int main() {
     setup_text_mode();
     appleii_home();
-    *APPLEII_MONITOR_CH = 10;
+    *APPLEII_MONITOR_CH = 9;
     appleii_vtab(4);
     printf("*** BREAKOUT ***\n\n");
     printf("  OBJECT IS TO DESTROY ALL BRICKS\n\n");
