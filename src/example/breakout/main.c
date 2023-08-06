@@ -1,5 +1,6 @@
 #include "apple-ii-monitor.h"
 #include "apple-ii-mmio.h"
+#include "sound.h"
 #include "stdio.h"
 
 // C adaptation of Integer Basic BREAKOUT program
@@ -105,7 +106,7 @@ void update_ball() {
     if (ball_y < 0 || ball_y >= 120) {
         ball_y = old_ball_y;
         ball_dy = -ball_dy;
-        // TODO: play bump sound
+        square_wave(1000, 110);
     }
     ball_x += ball_dx;
     if (ball_x < 0) {
@@ -115,7 +116,7 @@ void update_ball() {
     if (ball_x > 39) {
         ball_x = old_ball_x;
         ball_dx = -ball_dx;
-        // TODO: play bump sound
+        square_wave(1000, 110);
     } else {
         unsigned char ball_screen_x = ball_x;
         unsigned char ball_screen_y = ball_y / 3;
@@ -127,15 +128,18 @@ void update_ball() {
             ball_hits_in_round++;
             ball_dx = (ball_hits_in_round > 5) + 1;
             ball_dy = (ball_screen_y - paddle_y) * 2 - 5;
+            square_wave(2000, 127);
         } else {
             // must be a block hit
             ball_dx = -ball_dx;
             appleii_vline(ball_x, ball_screen_y & 0xfe, (ball_screen_y & 0xfe) + 1);
-            player_score += ball_x / 2 - 9;
+            unsigned char block_value = ball_x / 2 - 9;
+            player_score += block_value;
             appleii_vtab(20);
             *APPLEII_MONITOR_CH = 12;
             printf("%3d\n", player_score);
-            // TODO: play block hit sound
+            square_wave(1000, 127 - block_value * 2);
+            square_wave(1500, 110 - block_value * 2);
         }
     }
     
@@ -145,7 +149,9 @@ void update_ball() {
 }
 
 void kill_ball() {
-    // TODO: play kill sound
+    square_wave(1200, 100);
+    square_wave(1200, 70);
+    square_wave(1200, 100);
     balls_remaining--;
     if (balls_remaining >= 1) {
         reset_round();
@@ -180,7 +186,7 @@ void main_loop() {
         }
     }
     *APPLEII_MONITOR_CH = 4;
-    printf("SCORE =0\n\n");
+    printf("SCORE =   0\n\n");
     *APPLEII_MONITOR_WNDTOP = 21;
 
     player_score = 0;
@@ -213,10 +219,12 @@ int main() {
     appleii_vtab(4);
     printf("*** BREAKOUT ***\n\n");
     printf("  OBJECT IS TO DESTROY ALL BRICKS\n\n");
+    // TODO: Allow getting player name (requires getline())
     printf("  PRESS KEY TO BEGIN");
     getchar();
 
     while (1) {
+        // TODO: Allow setting custom colors (requires scanf())
         srand(*APPLEII_MONITOR_RND);
         main_loop();
         printf("ANOTHER GAME (Y/N)?");

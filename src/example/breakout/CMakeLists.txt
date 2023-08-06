@@ -1,4 +1,4 @@
-add_executable(apple-ii-example-breakout main.c rand.c)
+add_executable(apple-ii-example-breakout main.c rand.c sound.c)
 target_compile_options(apple-ii-example-breakout PRIVATE -Os -flto)
 set_target_properties(apple-ii-example-breakout PROPERTIES OUTPUT_NAME "breakout.sys")
 

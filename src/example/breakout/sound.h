@@ -1,0 +1,1 @@
+void square_wave(unsigned int length, unsigned char wavelength);
