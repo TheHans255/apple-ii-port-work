@@ -14,9 +14,6 @@ char getchar() {
 
 void __putchar(char c) {
     // Use COUT for character output, inserting the high bit
-    if (__builtin_constant_p(c)) {
-        if (c == '\n' || c == '\r') { appleii_crout(); }
-        else if (c == '\a') { appleii_bell(); }
-    }
+    if (c == '\n') c = '\r';
     appleii_cout(c | -128);
 }

@@ -2,6 +2,9 @@
 #include "apple-ii-mmio.h"
 #include "sound.h"
 #include "stdio.h"
+#include "stdlib.h"
+
+void *memcpy(void *dest, const void *src, size_t count);
 
 // C adaptation of Integer Basic BREAKOUT program
 // from the Apple II Red Book, by TheHans255.
@@ -22,6 +25,8 @@ void update_ball();
 void main_loop();
 void kill_ball();
 void end_game();
+
+unsigned char player_name[16];
 
 unsigned int player_score = 0;
 unsigned char balls_remaining = 0;
@@ -73,7 +78,7 @@ void reset_round() {
     if (balls_remaining > 1) {
         printf("BALLS LEFT: %d\n", balls_remaining);
     } else {
-        printf("LAST BALL!   \n");
+        printf("LAST BALL, %s!\n", player_name);
     }
     time_until_ball_active = 60;
     ball_hits_in_round = 0;
@@ -198,7 +203,7 @@ void main_loop() {
             break;
         }
         if (player_score >= 720) {
-            printf("CONGRATULATIONS, YOU WIN!\n");
+            printf("CONGRATULATIONS, %s, YOU WIN!\n", player_name);
             break;
         }
         update_paddle();
@@ -219,7 +224,14 @@ int main() {
     appleii_vtab(4);
     printf("*** BREAKOUT ***\n\n");
     printf("  OBJECT IS TO DESTROY ALL BRICKS\n\n");
-    // TODO: Allow getting player name (requires getline())
+
+    {
+        printf("HI, WHAT'S YOUR NAME?\n");
+        unsigned char player_name_len = appleii_getln1();
+        memcpy(player_name, (void *) APPLEII_MONITOR_INPUT_BUFFER, (player_name_len < 15 ? player_name_len : 15));
+        player_name[player_name_len] = '\0';
+    }
+    
     printf("  PRESS KEY TO BEGIN");
     getchar();
 
@@ -227,7 +239,7 @@ int main() {
         // TODO: Allow setting custom colors (requires scanf())
         srand(*APPLEII_MONITOR_RND);
         main_loop();
-        printf("ANOTHER GAME (Y/N)?");
+        printf("ANOTHER GAME, %s? (Y/N)", player_name);
         unsigned char response = getchar();
         if (response != 'Y' && response != 'y') {
             break;

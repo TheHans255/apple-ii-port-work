@@ -2,7 +2,8 @@
     "files.associations": {
         "stdio.h": "c",
         "cstddef": "c",
-        "apple-ii-monitor.h": "c"
+        "apple-ii-monitor.h": "c",
+        "stdlib.h": "c"
     },
     "cmake.sourceDirectory": "/home/hans/Documents/DevSync/Projects/apple-ii-port-test/src"
 }
