@@ -14,6 +14,6 @@ char getchar() {
 
 void __putchar(char c) {
     // Use COUT for character output, inserting the high bit
-    if (c == '\n') c = '\r';
+    if (__builtin_expect(c == '\n', 0)) c = '\r';
     appleii_cout(c | -128);
 }

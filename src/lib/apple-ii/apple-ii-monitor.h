@@ -43,7 +43,6 @@
 #define APPLEII_MONITOR_RND ((volatile unsigned int *) 0x4e)
 
 // The storage location for the input buffer written by GETLN
-// (Note that appleii_getln returns this buffer pointer for you)
 #define APPLEII_MONITOR_INPUT_BUFFER ((volatile unsigned char *) 0x200)
 
 // The vector to jump to for BRK instructions

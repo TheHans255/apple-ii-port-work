@@ -76,6 +76,7 @@ void reset_round() {
     ball_dx = -1;
     ball_dy = (rand() % 5) - 2;
     *APPLEII_MONITOR_CH = 5;
+    appleii_vtab(21);
     if (balls_remaining > 1) {
         printf("%d BALLS LEFT\n", balls_remaining);
     } else {
@@ -252,7 +253,7 @@ static enum appleii_lores_color pick_single_color() {
 void pick_colors() {
     printf("STANDARD COLORS, %s\n", player_name);
     printf("(Y/N)?");
-    unsigned char standard_color_response = getchar();
+    unsigned char standard_color_response = appleii_rdkey() & 0x7f;
     if (standard_color_response != 'N' && standard_color_response != 'n') {
         // use standard colors
         BACKGROUND_COLOR = LORES_MAGENTA;
@@ -310,7 +311,7 @@ int main() {
         srand(*APPLEII_MONITOR_RND);
         main_loop();
         printf("ANOTHER GAME, %s? (Y/N)", player_name);
-        unsigned char response = getchar();
+        unsigned char response = appleii_rdkey() & 0x7f;
         if (response != 'Y' && response != 'y') {
             break;
         }
