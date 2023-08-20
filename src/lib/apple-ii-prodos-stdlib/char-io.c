@@ -1,8 +1,8 @@
 #include "apple-ii-monitor.h"
 
 char getchar() {
-    // Use RDCHAR for character input, removing the high bit
-    unsigned char c = appleii_rdchar();
+    // Use RDKEY for character input, removing the high bit
+    unsigned char c = appleii_rdkey();
     return c & 0x7f;
 }
 
@@ -14,6 +14,9 @@ char getchar() {
 
 void __putchar(char c) {
     // Use COUT for character output, inserting the high bit
-    if (__builtin_expect(c == '\n', 0)) c = '\r';
+    if (__builtin_constant_p(c)) {
+        if (c == '\n' || c == '\r') { appleii_crout(); }
+        else if (c == '\a') { appleii_bell(); }
+    }
     appleii_cout(c | -128);
 }
