@@ -124,20 +124,20 @@ unsigned char appleii_rdchar();
 // KEYIN: Read a character from the builtin keyboard, returning when a
 // key is pressed. Also increments the RAND seed stored at 0x4e-0x4f.
 unsigned char appleii_keyin();
-// GETLN: Get a line of input with prompt.
-// The prompt character is stored in APPLEII_MONITOR_PROMPT.
-// Returns the length of the input line and its start location
-// (which is always 0x200)
-void appleii_getln(unsigned char *len, unsigned char **buf);
-// GETLNZ: Get a line of input with prompt after printing a CR.
-// The prompt character is stored in APPLEII_MONITOR_PROMPT (0x33).
-// Returns the length of the input line and its start location
-// (which is always 0x200)
-void appleii_getlnz(unsigned char *len, unsigned char **buf);
+// GETLN: Get a line of input with prompt, using the character
+// stored in APPLEII_MONITOR_PROMPT.
+// Stores the input line at APPLEII_MONITOR_INPUT_BUFFER (0x200)
+// and returns the length of the input line.
+unsigned char appleii_getln();
+// GETLNZ: Get a line of input with prompt after printing a CR,
+// using the character stored in APPLEII_MONITOR_PROMPT.
+// Stores the input line at APPLEII_MONITOR_INPUT_BUFFER (0x200)
+// and returns the length of the input line.
+unsigned char appleii_getlnz();
 // GETLN1: Get a line of input with no prompt.
-// Returns the length of the input line and its start location
-// (which is always 0x200)
-void appleii_getln1(unsigned char *len, unsigned char **buf);
+// Stores the input line at APPLEII_MONITOR_INPUT_BUFFER (0x200)
+// and returns the length of the input line.
+unsigned char appleii_getln1();
 
 // WAIT: Delays for a specified amount of time.
 // The delay time is (26 + 27A + 5A^2)/2 microseconds,
@@ -150,10 +150,16 @@ void appleii_setpwrc();
 // Index should be between 0 to 3, or the behavior is undefined.
 unsigned char appleii_pread(unsigned char index);
 
-// READ: Read a range of data from the cassette player previously written by WRITE
-unsigned char appleii_read(unsigned char *dest_start, unsigned char *dest_end);
-// WRITE: Write a range of data to the cassette player
-unsigned char appleii_write(unsigned char *src_start, unsigned char *src_end);
+// READ: Read a range of data from the cassette input port previously written by WRITE.
+// The user should start their cassette player a few seconds into the continuous
+// header tone. If the data is read correctly, READ will beep before returning,
+// but if the checksum is wrong, READ will beep and print the string "ERR"
+// before returning.
+void appleii_read(unsigned char *dest_start, unsigned char *dest_end);
+// WRITE: Write a range of data to the cassette output port.
+// This function writes a ten-second continuous tone as a header,
+// then the data followed by a one-byte checksum.
+void appleii_write(unsigned char *src_start, unsigned char *src_end);
 
 // The 16 colors available in LORES graphics
 enum appleii_lores_color { LORES_BLACK, LORES_MAGENTA, LORES_DARK_BLUE, LORES_PURPLE,
@@ -183,7 +189,8 @@ void appleii_clrtop();
 enum appleii_lores_color appleii_scrn(unsigned char x, unsigned char y);
 
 // NOTE: Subroutines not included:
-// - MOVE (because we already have a compiler intrinsic for it)
-// - VERIFY (because it outputs to the compiler)
+// - MOVE (because we already have a better compiler intrinsic for it)
+// - VERIFY (because it outputs to the screen instead of into any
+//   useful registers or memory locations)
 
 #endif // not __APPLE_II_MONITOR

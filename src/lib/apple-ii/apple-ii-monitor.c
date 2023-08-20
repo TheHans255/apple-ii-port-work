@@ -64,19 +64,22 @@ unsigned char appleii_keyin() {
     return c;
 }
 
-void appleii_getln(unsigned char *len, unsigned char **buf) {
-    __attribute__((leaf)) asm volatile ("jsr 0xfd6a": "=x" (*len) : :); 
-    *buf = APPLEII_MONITOR_INPUT_BUFFER;
+unsigned char appleii_getln() {
+    unsigned char len;
+    __attribute__((leaf)) asm volatile ("jsr 0xfd6a": "=x" (len) : :); 
+    return len;
 }
 
-void appleii_getlnz(unsigned char *len, unsigned char **buf) { 
-    __attribute__((leaf)) asm volatile ("jsr 0xfd67": "=x" (*len) : :); 
-    *buf = APPLEII_MONITOR_INPUT_BUFFER;
+unsigned char appleii_getlnz() { 
+    unsigned char len;
+    __attribute__((leaf)) asm volatile ("jsr 0xfd67": "=x" (len) : :); 
+    return len;
 }
 
-void appleii_getln1(unsigned char *len, unsigned char **buf) { 
-    __attribute__((leaf)) asm volatile ("jsr 0xfd6f": "=x" (*len) : :); 
-    *buf = APPLEII_MONITOR_INPUT_BUFFER;
+unsigned char appleii_getln1() { 
+    unsigned char len;
+    __attribute__((leaf)) asm volatile ("jsr 0xfd6f": "=x" (len) : :); 
+    return len;
 }
 
 void appleii_wait(unsigned char delay_time) { __attribute__((leaf)) asm volatile ("jsr 0xfca8": : "a" (delay_time) : "a"); }
@@ -89,13 +92,13 @@ unsigned char appleii_pread(unsigned char index) {
     return result; 
 }
 
-unsigned char appleii_read(unsigned char *dest_start, unsigned char *dest_end) {
+void appleii_read(unsigned char *dest_start, unsigned char *dest_end) {
     *((unsigned char * * volatile) 0x3c) = dest_start;
     *((unsigned char * * volatile) 0x3e) = dest_end;
     __attribute__((leaf)) asm volatile ("jsr 0xfefd": : :); 
 }
 
-unsigned char appleii_write(unsigned char *src_start, unsigned char *src_end) {
+void appleii_write(unsigned char *src_start, unsigned char *src_end) {
     *((unsigned char * * volatile) 0x3c) = src_start;
     *((unsigned char * * volatile) 0x3e) = src_end;
     __attribute__((leaf)) asm volatile ("jsr 0xfecd": : :); 
