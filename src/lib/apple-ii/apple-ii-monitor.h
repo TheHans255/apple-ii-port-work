@@ -8,8 +8,8 @@
 #define APPLEII_MONITOR_WNDWDTH ((volatile unsigned char *) 0x21)
 // The top line of the text window. Should range from 0 to 23 inclusive.
 #define APPLEII_MONITOR_WNDTOP ((volatile unsigned char *) 0x22)
-// The bottom line of the text window. Should range from 0 to 23 inclusive
-// and should not be less than WNDTOP
+// The bottom line of the text window, plus 1. Should range from 1 to 24 inclusive
+// and should be greater than WNDTOP
 #define APPLEII_MONITOR_WNDBTM ((volatile unsigned char *) 0x23)
 // The horizontal location of the current character in video output
 // (stored as a displacement from the left edge of the text window)

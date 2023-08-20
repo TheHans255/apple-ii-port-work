@@ -18,7 +18,7 @@ void appleii_crout() { __attribute__((leaf)) asm volatile ("jsr 0xfd8e": : :); }
 
 void appleii_crout1() { __attribute__((leaf)) asm volatile ("jsr 0xfd8b": : :); }
 
-void appleii_home() { __attribute__((leaf)) asm volatile ("jsr 0xfc58": : :); }
+void appleii_home() { __attribute__((leaf)) asm volatile ("jsr 0xfc58": : : "a", "x", "y"); }
 
 void appleii_iorest() { __attribute__((leaf)) asm volatile ("jsr 0xff3f": : : "a", "x", "y", "p"); }
 

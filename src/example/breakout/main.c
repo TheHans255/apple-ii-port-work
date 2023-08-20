@@ -19,6 +19,7 @@ void setup_text_mode();
 void setup_graphics_mode();
 void wait_for_vblank();
 
+void pick_colors();
 void reset_round();
 void update_paddle();
 void update_ball();
@@ -49,7 +50,7 @@ void setup_text_mode() {
     *APPLEII_MONITOR_WNDLFT = 0;
     *APPLEII_MONITOR_WNDWDTH = 39;
     *APPLEII_MONITOR_WNDTOP = 0;
-    *APPLEII_MONITOR_WNDBTM = 23;
+    *APPLEII_MONITOR_WNDBTM = 24;
 }
 
 void setup_graphics_mode() {
@@ -59,7 +60,7 @@ void setup_graphics_mode() {
     *APPLEII_MONITOR_WNDLFT = 0;
     *APPLEII_MONITOR_WNDWDTH = 39;
     *APPLEII_MONITOR_WNDTOP = 20;
-    *APPLEII_MONITOR_WNDBTM = 23;
+    *APPLEII_MONITOR_WNDBTM = 24;
 }
 
 void wait_for_vblank() {
@@ -76,7 +77,7 @@ void reset_round() {
     ball_dy = (rand() % 5) - 2;
     *APPLEII_MONITOR_CH = 5;
     if (balls_remaining > 1) {
-        printf("BALLS LEFT: %d\n", balls_remaining);
+        printf("%d BALLS LEFT\n", balls_remaining);
     } else {
         printf("LAST BALL, %s!\n", player_name);
     }
@@ -174,7 +175,9 @@ const char *SCORE_RATINGS[] = {
 };
 
 void main_loop() {
+    pick_colors();
     setup_graphics_mode();
+    appleii_home();
     appleii_vtab(20);
     appleii_setcol(BACKGROUND_COLOR);
     for (unsigned char i = 0; i <= 39; i++) {
@@ -196,6 +199,9 @@ void main_loop() {
 
     player_score = 0;
     balls_remaining = 5;
+    paddle_y = 0;
+    ball_x = 10;
+    ball_y = 10;
     reset_round();
     while (1) {
         if (balls_remaining <= 0) {
@@ -217,6 +223,73 @@ void main_loop() {
     }
 }
 
+static enum appleii_lores_color pick_single_color() {
+    int response;
+    while (1) {
+        printf(" COLOR (0 TO 15)");
+        unsigned char len = appleii_getln1();
+        response = 0;
+        for (unsigned char i = 0; i < len; i++) {
+            unsigned char c = APPLEII_MONITOR_INPUT_BUFFER[i] & 0x7f;
+            if (c == ' ' || c == '\t' || c == '\n' || c == '\r') continue;
+            if (c >= '0' && c <= '9') {
+                response = response * 10 + (c - '0');
+            } else {
+                // illegal character found
+                response = -1;
+                break;
+            }
+        }
+        if (response < 0 || response > 15) {
+            printf("INVALID, REENTER");
+        } else {
+            break;
+        }
+    }
+    return (enum appleii_lores_color) response;
+}
+
+void pick_colors() {
+    printf("STANDARD COLORS, %s\n", player_name);
+    printf("(Y/N)?");
+    unsigned char standard_color_response = getchar();
+    if (standard_color_response != 'N' && standard_color_response != 'n') {
+        // use standard colors
+        BACKGROUND_COLOR = LORES_MAGENTA;
+        EVEN_BRICK_COLOR = LORES_YELLOW;
+        ODD_BRICK_COLOR = LORES_ORANGE;
+        PADDLE_COLOR = LORES_MEDIUM_BLUE;
+        BALL_COLOR = LORES_WHITE;
+        return;
+    }
+    // pick custom colors
+    setup_graphics_mode();
+    for (unsigned char i = 0; i <= 39; i++) {
+        appleii_setcol((enum appleii_lores_color) (i/2 * (i < 32)));
+        appleii_vline(i, 0, 39);
+    }
+    *APPLEII_MONITOR_WNDTOP = 20;
+    printf("\n\n\n");
+    for (unsigned char i = 0; i <= 15; i++) {
+        appleii_vtab(i % 2 + 20);
+        *APPLEII_MONITOR_CH = i * 2 + (i < 10);
+        printf("%d", i);
+    }
+    *APPLEII_MONITOR_WNDTOP = 22;
+    appleii_vtab(23);
+    printf("\n");
+    printf("BACKGROUND");
+    BACKGROUND_COLOR = pick_single_color();
+    printf("EVEN BRICK");
+    EVEN_BRICK_COLOR = pick_single_color();
+    printf("ODD BRICK");
+    ODD_BRICK_COLOR = pick_single_color();
+    printf("PADDLE");
+    PADDLE_COLOR = pick_single_color();
+    printf("BALL");
+    BALL_COLOR = pick_single_color();
+}
+
 int main() {
     setup_text_mode();
     appleii_home();
@@ -226,17 +299,14 @@ int main() {
     printf("  OBJECT IS TO DESTROY ALL BRICKS\n\n");
 
     {
-        printf("HI, WHAT'S YOUR NAME?\n");
+        printf("HI, WHAT'S YOUR NAME?");
         unsigned char player_name_len = appleii_getln1();
-        memcpy(player_name, (void *) APPLEII_MONITOR_INPUT_BUFFER, (player_name_len < 15 ? player_name_len : 15));
+        if (player_name_len > 15) player_name_len = 15;
+        memcpy(player_name, (void *) APPLEII_MONITOR_INPUT_BUFFER, player_name_len);
         player_name[player_name_len] = '\0';
     }
-    
-    printf("  PRESS KEY TO BEGIN");
-    getchar();
 
     while (1) {
-        // TODO: Allow setting custom colors (requires scanf())
         srand(*APPLEII_MONITOR_RND);
         main_loop();
         printf("ANOTHER GAME, %s? (Y/N)", player_name);
