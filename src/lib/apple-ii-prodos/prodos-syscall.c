@@ -150,7 +150,7 @@ char prodos_get_prefix(const char **pathname) {
 char prodos_open(const char *pathname, char *io_buffer, char *ref_num) {
     struct prodos_open_param {
         char param_count;
-        char *pathname;
+        const char *pathname;
         char *io_buffer;
         char ref_num;
     } __attribute((packed)) p;

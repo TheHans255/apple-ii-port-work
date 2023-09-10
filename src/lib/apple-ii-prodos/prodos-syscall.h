@@ -248,8 +248,8 @@ char prodos_set_buf(char ref_num, unsigned char *io_buffer);
 // io_buffer: Returns the pointer to the 1024-byte IO buffer for the file
 char prodos_get_buf(char ref_num, unsigned char **io_buffer);
 
-#define PRODOS_SYSTEM_DATE ((*struct prodos_date) 0xBF90)
-#define PRODOS_SYSTEM_TIME ((*struct prodos_time) 0xBF92)
+#define PRODOS_SYSTEM_DATE ((struct prodos_date *) 0xBF90)
+#define PRODOS_SYSTEM_TIME ((struct prodos_time *) 0xBF92)
 
 // Updates the current date and time in the system date and time locations
 // at PRODOS_SYSTEM_DATE and PRODOS_SYSTEM_TIME
