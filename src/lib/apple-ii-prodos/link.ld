@@ -16,9 +16,12 @@ ASSERT(__rc31 == 0x1f, "Inconsistent zero page map.")
  * (0x3A to 0x4F is reserved by ProDOS).
  */
 MEMORY { 
-    zp : ORIGIN = 0x0050, LENGTH = (0x1000 - 0x0050) 
+    zp : ORIGIN = 0x0050, LENGTH = (0x1000 - 0x0050)
     ram (rw) : ORIGIN = 0x2000, LENGTH = 0x9F00
 }
+
+REGION_ALIAS("c_readonly", ram)
+REGION_ALIAS("c_writeable", ram)
 
 /* Set the operand stack to the 6K memory region behind our program */
 __stack = 0x1fff;
