@@ -3,11 +3,13 @@
 //
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "prodos-combo-buffer.h"
 
 PRODOS_COMBO_BUFFER *prodos_combo_buffer_malloc(size_t min_char_buffer_size) {
     size_t total_size = 1024 + 2 + min_char_buffer_size;
     void *candidate = malloc(total_size);
+    printf("Candidate for size %d: %x", total_size, (unsigned int) candidate);
     size_t candidate_end;
     while ((candidate_end = (size_t) candidate + total_size) % 256 != 0) {
         size_t next_page_boundary = (candidate_end + 255) & 0xff00;
@@ -15,6 +17,7 @@ PRODOS_COMBO_BUFFER *prodos_combo_buffer_malloc(size_t min_char_buffer_size) {
         total_size += difference;
         free(candidate);
         candidate = malloc(total_size);
+        printf("New candidate for size %d: %x", total_size, (unsigned int) candidate);
     }
     PRODOS_COMBO_BUFFER *result = (PRODOS_COMBO_BUFFER *) candidate;
     result->user_buffer_length = total_size - 1024 - 2;

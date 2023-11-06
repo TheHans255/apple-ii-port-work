@@ -91,6 +91,12 @@ void write_and_read_file() {
 }
 
 int main() {
+    extern void *__heap_start;
+    printf("Heap start: %x\n", (unsigned int) __heap_start);
+    __set_heap_limit(16384);
+    void *test = malloc(4);
+    printf("Test allocation: %x\n", (unsigned int) test);
+    free(test);
     list_volumes();
     getchar();
     write_and_read_file();

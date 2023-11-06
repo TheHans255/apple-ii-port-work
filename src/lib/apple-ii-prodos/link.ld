@@ -28,6 +28,7 @@ __stack = 0x1fff;
 
 SECTIONS {
     INCLUDE c.ld
+    __heap_start = .;
 }
 
 OUTPUT_FORMAT { 
