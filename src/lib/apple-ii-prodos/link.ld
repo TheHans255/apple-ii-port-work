@@ -23,8 +23,8 @@ MEMORY {
 REGION_ALIAS("c_readonly", ram)
 REGION_ALIAS("c_writeable", ram)
 
-/* Set the operand stack to the 6K memory region behind our program */
-__stack = 0x1fff;
+/* Set the operand stack to the top of usable memory */
+__stack = 0xbf00;
 
 SECTIONS {
     INCLUDE c.ld

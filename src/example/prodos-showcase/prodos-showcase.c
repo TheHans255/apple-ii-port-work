@@ -3,6 +3,7 @@
 //
 
 #include "prodos-syscall.h"
+#include "io-buffer-alloc.h"
 #include "stdio.h"
 
 void * memcpy(void *dest, const void *src, unsigned short count);
@@ -42,9 +43,10 @@ void write_and_read_file() {
         file_info.create_time = *PRODOS_SYSTEM_TIME;
         prodos_create(TEST_PATHNAME, &file_info);
     }
+    char *io_buffer = io_buffer_alloc();
     char ref_num;
     {
-        char open_error = prodos_open(TEST_PATHNAME, (char *) 0x800, &ref_num);
+        char open_error = prodos_open(TEST_PATHNAME, io_buffer, &ref_num);
         if (open_error) {
             printf("Error during OPEN: %x\n", open_error);
             return;
