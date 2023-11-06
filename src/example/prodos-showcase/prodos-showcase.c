@@ -2,8 +2,10 @@
 // Created by TheHans255 on 9/9/23.
 //
 
+#include <stdlib.h>
 #include "prodos-syscall.h"
 #include "stdio.h"
+#include "prodos-combo-buffer.h"
 
 void * memcpy(void *dest, const void *src, unsigned short count);
 
@@ -42,17 +44,21 @@ void write_and_read_file() {
         file_info.create_time = *PRODOS_SYSTEM_TIME;
         prodos_create(TEST_PATHNAME, &file_info);
     }
+    PRODOS_COMBO_BUFFER *combo_buffer = prodos_combo_buffer_malloc(41);
+    char *line = prodos_combo_buffer_user_buffer(combo_buffer);
+    char *io_buffer = prodos_combo_buffer_io_buffer(combo_buffer);
+    printf("CHAR: %x, IO: %x\n", (unsigned int) line, (unsigned int) io_buffer);
     char ref_num;
     {
-        char open_error = prodos_open(TEST_PATHNAME, (char *) 0x800, &ref_num);
+        char open_error = prodos_open(TEST_PATHNAME, io_buffer, &ref_num);
         if (open_error) {
             printf("Error during OPEN: %x\n", open_error);
+            free(combo_buffer);
             return;
         }
     }
     for (unsigned int i = 0; i < 20; i++) {
         unsigned int square = i * i;
-        char line[12];
         int write_count = snprintf(line, 12, "%d\r", square);
         // TODO: All the high bits should be set when actually writing to a ProDOS file
         unsigned int final_write_count;
@@ -62,7 +68,6 @@ void write_and_read_file() {
     prodos_newline(ref_num, 0x7F, '\n');
     {
         char read_error;
-        char line[41];
         while (1) {
             unsigned int final_read_count;
             read_error = prodos_read(ref_num, line, 40, &final_read_count);
@@ -82,6 +87,7 @@ void write_and_read_file() {
         printf("%ld total bytes written", file_eof);
     }
     prodos_close(ref_num);
+    free(combo_buffer);
 }
 
 int main() {

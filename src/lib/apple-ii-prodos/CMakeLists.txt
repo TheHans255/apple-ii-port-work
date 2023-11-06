@@ -1,6 +1,7 @@
 add_library (apple-ii-prodos
     prodos-syscall-core.S
     prodos-syscall.c
+    prodos-combo-buffer.c
 )
 
 target_compile_options(apple-ii-prodos PRIVATE -Os -flto)
