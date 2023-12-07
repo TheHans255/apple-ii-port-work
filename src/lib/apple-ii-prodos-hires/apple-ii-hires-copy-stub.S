@@ -6,14 +6,14 @@
 ; addressing until the final jump.
 
 .section .apple_ii_hires_copy_stub,"aR",@progbits
-  lda #$7e
-  sta $1
   lda #$be
   sta $3
   lda #0
   sta $0
   sta $2
+  ldx #$7e
 __copy_stub_loop_outer:
+  stx $1
   ldy #0
 __copy_stub_loop_inner:
   lda ($0),y
@@ -21,9 +21,8 @@ __copy_stub_loop_inner:
   iny
   bne __copy_stub_loop_inner
   dec $3
-  dec $1
-  lda $1
-  cmp #$20
+  dex
+  cpx #$20
   bcs __copy_stub_loop_outer
   jmp __copy_stub_end
 __copy_stub_end:
