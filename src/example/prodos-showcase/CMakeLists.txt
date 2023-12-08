@@ -1,8 +1,8 @@
-add_executable(apple-ii-example-prodos-showcase
+add_executable(apple-iie-example-prodos-showcase
     prodos-showcase.c
     io-buffer-alloc.c
     )
-target_compile_options(apple-ii-example-prodos-showcase PRIVATE -Os -flto)
-set_target_properties(apple-ii-example-prodos-showcase PROPERTIES OUTPUT_NAME "pd.showcase.sys")
+target_compile_options(apple-iie-example-prodos-showcase PRIVATE -Os -flto)
+set_target_properties(apple-iie-example-prodos-showcase PROPERTIES OUTPUT_NAME "pd.showcase.sys")
 
-target_link_libraries(apple-ii-example-prodos-showcase apple-ii apple-ii-prodos apple-ii-prodos-stdlib -static)
+target_link_libraries(apple-iie-example-prodos-showcase apple-iie-prodos-cli -static)

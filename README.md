@@ -10,7 +10,7 @@ to the Apple //e as a build target.
 - A suitable Apple //e emulator, such as [AppleWin](https://github.com/AppleWin/AppleWin)
   OR a real Apple //e device (Apple //e, //c, IIgs in emulation mode, or compatible clone)
   with a disk transfer program such as [ADTPro](https://adtpro.com/)
-- A [ProDOS 8](https://prodos8.com/) disk image. The latest version, ProDOS 2.4.2,
+- A bootable [ProDOS 8](https://prodos8.com/) disk image. The latest version, ProDOS 2.4.2,
   is [available for download on ProDOS's website](https://prodos8.com/releases/prodos-242/).
 - A program for manipulating Apple disk images compatible with your dev machine, such as
   [AppleCommander](https://applecommander.github.io/)
@@ -20,12 +20,11 @@ to the Apple //e as a build target.
 1. When you first clone the repository, or change any of the CMake files, execute
    `$ cmake -D CMAKE_C_COMPILER="/path/to/mos-common-clang" -S src -B build` in the root of the repository,
    where `/path/to/mos-common-clang` is the path to `mos-common-clang` in your LLVM-MOS SDK installation.
-2. Using your Apple disk image manipulation program, add `testtext.txt` to the root of your ProDOS disk
-3. For each change, execute `$ make -C build` from the root of the repository
-4. Using your disk image manipulation program, add `build/example/hello/hello.sys` to the root of your
-   ProDOS disk. (Be sure to delete any previous `hello.sys` first).
+2. For each change, execute `$ make -C build` from the root of the repository
+3. Find the example you want to load as `build/example/<example name>/<example name>.sys`
+4. Using your disk manipulation program, import that `.sys` file to the root of the ProDOS disk.
 5. Load the disk in the emulator (or transfer it to the real device), boot it,
-   and select `HELLO.SYS` in the menu.
+   and select your chosen `.sys` program in the menu.
 
 ## Goals
 

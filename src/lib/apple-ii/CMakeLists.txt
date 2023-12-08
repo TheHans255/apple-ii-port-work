@@ -1,6 +1,3 @@
-add_library(apple-ii
-    apple-ii-monitor.c
-)
+add_library(apple-ii INTERFACE)
 
-target_compile_options(apple-ii PRIVATE -Os -flto)
-target_include_directories (apple-ii PUBLIC .)
+target_include_directories (apple-ii INTERFACE .)

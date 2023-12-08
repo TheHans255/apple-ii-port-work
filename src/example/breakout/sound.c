@@ -1,4 +1,4 @@
-#include "apple-ii-mmio.h"
+#include "apple-ii-io.h"
 
 void square_wave(unsigned int length, unsigned char wavelength) {
 

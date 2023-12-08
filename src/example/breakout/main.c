@@ -1,5 +1,6 @@
 #include "apple-ii-monitor.h"
-#include "apple-ii-mmio.h"
+#include "apple-ii-io.h"
+#include "apple-iie-io.h"
 #include "sound.h"
 #include "stdio.h"
 #include "stdlib.h"
