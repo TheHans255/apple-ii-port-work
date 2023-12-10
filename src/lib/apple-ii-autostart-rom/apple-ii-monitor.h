@@ -1,6 +1,8 @@
 #ifndef __APPLE_II_MONITOR
 #define __APPLE_II_MONITOR
 
+#include "apple-ii-io.h"
+
 // The top of the text window. Should range from 0 to 39 inclusive
 #define APPLEII_MONITOR_WNDLFT ((volatile unsigned char *) 0x20)
 // The width of the text window. This plus WNDLFT
@@ -159,12 +161,6 @@ void appleii_read(unsigned char *dest_start, unsigned char *dest_end);
 // This function writes a ten-second continuous tone as a header,
 // then the data followed by a one-byte checksum.
 void appleii_write(unsigned char *src_start, unsigned char *src_end);
-
-// The 16 colors available in LORES graphics
-enum appleii_lores_color { LORES_BLACK, LORES_MAGENTA, LORES_DARK_BLUE, LORES_PURPLE,
-  LORES_DARK_GREEN, LORES_GREY_1, LORES_MEDIUM_BLUE, LORES_LIGHT_BLUE,
-  LORES_BROWN, LORES_ORANGE, LORES_GREY_2, LORES_PINK,
-  LORES_LIGHT_GREEN, LORES_YELLOW, LORES_AQUAMARINE, LORES_WHITE };
 
 // SETCOL: Set the color for future LORES graphics operations
 void appleii_setcol(enum appleii_lores_color color);

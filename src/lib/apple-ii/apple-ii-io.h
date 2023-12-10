@@ -36,6 +36,12 @@
 // (LORES graphics are displayed instead)
 #define APPLEII_HIRES_OFF ((volatile char *) 0xC054)
 
+// The 16 colors available in LORES graphics
+enum appleii_lores_color { LORES_BLACK, LORES_MAGENTA, LORES_DARK_BLUE, LORES_PURPLE,
+  LORES_DARK_GREEN, LORES_GREY_1, LORES_MEDIUM_BLUE, LORES_LIGHT_BLUE,
+  LORES_BROWN, LORES_ORANGE, LORES_GREY_2, LORES_PINK,
+  LORES_LIGHT_GREEN, LORES_YELLOW, LORES_AQUAMARINE, LORES_WHITE };
+
 // Turns the Annunciator 0 output off
 #define APPLEII_ANNUNCIATOR0_OFF ((volatile char *) 0xC058)
 // Turns the Annunciator 0 output on
