@@ -254,9 +254,10 @@ static enum appleii_lores_color pick_single_color() {
 }
 
 void pick_colors() {
-    printf("STANDARD COLORS, %s\n", player_name);
+    printf("STANDARD COLORS, %s", player_name);
     printf("(Y/N)?");
     unsigned char standard_color_response = getchar();
+    printf("\n");
     if (standard_color_response != 'N' && standard_color_response != 'n') {
         // use standard colors
         BACKGROUND_COLOR = LORES_MAGENTA;
@@ -312,13 +313,14 @@ int main() {
         main_loop();
         printf("ANOTHER GAME, %s? (Y/N)", player_name);
         unsigned char response = getchar();
+        printf("\n");
         if (response != 'Y' && response != 'y') {
             break;
         }
     }
 
-    // NOTE: The old program printed "GAME OVER" here,
-    // but that won't show up because ProDOS will take
-    // us back to the system menu
+    setup_text_mode();
+    text_home();
+    printf("GAME OVER\n\n");
     return 0;
 }

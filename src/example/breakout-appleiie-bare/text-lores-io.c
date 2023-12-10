@@ -111,10 +111,9 @@ void text_home() {
 size_t text_getln(char *buffer, size_t buffer_len) {
     size_t input_size = 0;
     while (1) {
-        // TODO: Flashing cursor
         char c = getchar();
         // RUB character
-        if (c == 0x7f) { 
+        if (c == 0x7f || c == 0x08) { 
             if (input_size > 0) {
                 input_size--;
                 text_x--;
@@ -125,23 +124,32 @@ size_t text_getln(char *buffer, size_t buffer_len) {
             }
         } else {
             __putchar(c);
-            if (input_size < buffer_len - 1) {
-                buffer[input_size] = c;
-            }
-            input_size++;
             if (c == '\r' || c == '\n') {
                 break;
+            } else {
+                if (input_size <= buffer_len - 1) {
+                    buffer[input_size] = c;
+                }
+                input_size++;
             }
         }
     }
-    buffer[(input_size < buffer_len ? input_size : buffer_len) - 1] = '\0';
+    if (input_size > buffer_len - 1) {
+        input_size = buffer_len - 1;
+    }
+    buffer[input_size] = '\0';
     return input_size;
 }
 
 int getchar() {
+    char *line_address = get_line_address(text_y);
+    char prev_c = line_address[text_x];
+    line_address[text_x] = 0x20;
     *APPLEII_KEYBOARD_STROBE = 0;
     unsigned char c;
     while ((c = *APPLEII_KEYBOARD_DATA) < 128) ;
+    if (c == 0x95) c = prev_c;
+    line_address[text_x] = prev_c;
     return c & 0x7f;
 }
 
@@ -156,13 +164,13 @@ void __putchar(char c) {
         char *line_address = get_line_address(text_y);
         line_address[text_x] = c | 0x80;
         text_x++;
-        if (text_x > text_left + text_width) {
+        if (text_x >= text_left + text_width) {
             text_y++;
             text_x = text_left;
         }
-    } else if (c == '\n') {
+    } else if (c == '\r' || c == '\n') {
         text_y++;
-        text_x = 0;
+        text_x = text_left;
     }
     // TODO: Handle other control characters here
     while (text_y >= text_bot) {
