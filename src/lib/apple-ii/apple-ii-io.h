@@ -31,10 +31,10 @@
 // from the default first page.
 #define APPLEII_PAGE_PAGE1 ((volatile char *) 0xC054)
 // Enables the Apple II HIRES graphics mode
-#define APPLEII_HIRES_ON ((volatile char *) 0xC055)
+#define APPLEII_HIRES_ON ((volatile char *) 0xC057)
 // Disables the Apple II HIRES graphics mode
 // (LORES graphics are displayed instead)
-#define APPLEII_HIRES_OFF ((volatile char *) 0xC054)
+#define APPLEII_HIRES_OFF ((volatile char *) 0xC056)
 
 // The 16 colors available in LORES graphics
 enum appleii_lores_color { LORES_BLACK, LORES_MAGENTA, LORES_DARK_BLUE, LORES_PURPLE,

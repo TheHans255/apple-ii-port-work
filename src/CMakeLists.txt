@@ -15,3 +15,4 @@ add_subdirectory(lib/apple-ii-bare)
 add_subdirectory(lib/apple-iie-bare)
 
 add_subdirectory(example/breakout-appleiie-bare)
+add_subdirectory(example/serpinski-bare)
