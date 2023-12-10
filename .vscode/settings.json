@@ -5,5 +5,5 @@
         "apple-ii-monitor.h": "c",
         "stdlib.h": "c"
     },
-    "cmake.sourceDirectory": "/home/hans/Documents/DevSync/Projects/apple-ii-port-test/src"
+    "cmake.sourceDirectory": "/home/hans/Documents/DevSync/Projects/apple-ii-port-work/src"
 }

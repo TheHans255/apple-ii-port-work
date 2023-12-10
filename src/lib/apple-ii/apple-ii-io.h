@@ -1,5 +1,8 @@
 // Memory mapped locations for the Apple II
 
+#ifndef __APPLE_II_IO
+#define __APPLE_II_IO
+
 // Apple II keyboard data. If the high bit is set, then the
 // lower seven bits contain the last key that was pressed
 // since the keyboard strobe was cleared.
@@ -8,24 +11,10 @@
 // the next key from the keyboard.
 #define APPLEII_KEYBOARD_STROBE ((volatile char *) 0xC010)
 
-// Turns on the Apple //e alternate character set.
-// In this set, a character with its high bit cleared is
-// the INVERSE version of the same character with the high
-// bit set - FLASHING is removed.
-#define APPLEIIE_ALTCHARSET_ON ((volatile char *) 0xC00F)
-// Turns off the Apple //e alternate character set -
-// the lower 128 characters is INVERSE and FLASHING
-// uppercase characters.
-#define APPLEIIE_ALTCHARSET_OFF ((volatile char *) 0xC00E)
-// Reads the current state of the alternate character set switch
-#define APPLEIIE_ALTCHARSET_READ ((volatile char *) 0xC01E)
 // Disables graphics and displays full-screen text
 #define APPLEII_TEXTMODE_TEXT ((volatile char *) 0xC051)
 // Enables graphics
 #define APPLEII_TEXTMODE_GRAPHICS ((volatile char *) 0xC050)
-// Reads the current state of the text switch
-// (high bit set = text, low bit set = graphics)
-#define APPLEIIE_TEXTMODE_READ ((volatile char *) 0xC01A)
 // Turns on the Apple II mixed mode - when graphics mode
 // is enabled, the lower 4 lines of text will still appear.
 // (This switch has no effect when graphics are disabled)
@@ -33,8 +22,6 @@
 // Turns off the Apple II mixed mode - any active graphics mode
 // will take up the entire screen
 #define APPLEII_MIXEDMODE_OFF ((volatile char *) 0xC052)
-// Reads the current state of the mixed mode switch
-#define APPLEIIE_MIXEDMODE_READ ((volatile char *) 0xC01B)
 // Enables Page 2 - all graphics and text will be taken
 // from the alternate second page.
 // If the 80STORE flag is set to AUX, this switch instead
@@ -43,34 +30,17 @@
 // Enables Page 1 - all graphics and text will be taken
 // from the default first page.
 #define APPLEII_PAGE_PAGE1 ((volatile char *) 0xC054)
-// Reads the current state of the page switch
-#define APPLEIIE_PAGE_READ ((volatile char *) 0xC01C)
 // Enables the Apple II HIRES graphics mode
 #define APPLEII_HIRES_ON ((volatile char *) 0xC055)
 // Disables the Apple II HIRES graphics mode
 // (LORES graphics are displayed instead)
 #define APPLEII_HIRES_OFF ((volatile char *) 0xC054)
-// Reads the current state of the HIRES switch
-#define APPLEIIE_HIRES_READ ((volatile char *) 0xC01D)
-// Enables 80-column display on the Apple //e
-#define APPLEIIE_80COLUMN_ON ((volatile char *) 0xC00D)
-// Disables 80-column display on the Apple //e
-#define APPLEIIE_80COLUMN_OFF ((volatile char *) 0xC00C)
-// Reads the current state of the 80-column switch
-#define APPLEIIE_80COLUMN_READ ((volatile char *) 0xC01F)
-// Enables storing to the 80-column card auxillary memory
-// on the Apple //e
-#define APPLEIIE_80STORE_AUX ((volatile char *) 0xC001)
-// Disables storing to the 80-column card auxillary memory
-// on the Apple //e.
-// (Note that this is write-only - reading this address
-// yields keyboard data)
-#define APPLEIIE_80STORE_MAIN ((volatile char *) 0xC000)
-// Reads the current state of the 80STORE switch
-#define APPLEIIE_80STORE_READ ((volatile char *) 0xC018)
-// Reads the current state of VBlank on the Apple //e
-// (if the bit is high, then the Apple is in VBlank)
-#define APPLEIIE_VBLANK ((volatile char *) 0xC019)
+
+// The 16 colors available in LORES graphics
+enum appleii_lores_color { LORES_BLACK, LORES_MAGENTA, LORES_DARK_BLUE, LORES_PURPLE,
+  LORES_DARK_GREEN, LORES_GREY_1, LORES_MEDIUM_BLUE, LORES_LIGHT_BLUE,
+  LORES_BROWN, LORES_ORANGE, LORES_GREY_2, LORES_PINK,
+  LORES_LIGHT_GREEN, LORES_YELLOW, LORES_AQUAMARINE, LORES_WHITE };
 
 // Turns the Annunciator 0 output off
 #define APPLEII_ANNUNCIATOR0_OFF ((volatile char *) 0xC058)
@@ -100,12 +70,8 @@
 
 // Reads the gamepad button 0 input
 #define APPLEII_BUTTON_0 ((volatile char *) 0xC061)
-// Reads the Open Apple key on the Apple //e keyboard
-#define APPLEIIE_OPEN_APPLE ((volatile char *) 0xC061)
 // Reads the gamepad button 1 input
 #define APPLEII_BUTTON_1 ((volatile char *) 0xC062)
-// Reads the Solid Apple key on the Apple //e keyboard
-#define APPLEIIE_SOLID_APPLE ((volatile char *) 0xC062)
 // Reads the gamepad button 2 input
 #define APPLEII_BUTTON_2 ((volatile char *) 0xC063)
 
@@ -139,3 +105,16 @@
 // is directly proportional to how far the analog input has advanced
 // (from 0 Ohms to 150K ohms)
 #define APPLEII_ANALOG_INPUT_3 ((volatile char *) 0xC067)
+
+// The 1K memory region for the primary Apple II text or LORES Graphics page
+#define APPLEII_TEXT_PAGE_1 ((char *) 0x0400)
+// The 1K memory region for the secondary Apple II text or LORES Graphics page.
+// Note that this memory region is also usually the first part of a BASIC
+// program and hence needs special care to use
+#define APPLEII_TEXT_PAGE_2 ((char *) 0x0800)
+// The 8K memory region for the first HIRES graphics page
+#define APPLEII_HIRES_PAGE_1 ((char *) 0x2000)
+// The 8K memory region for the second HIRES graphics page
+#define APPLEII_HIRES_PAGE_2 ((char *) 0x4000)
+
+#endif // __APPLE_II_IO

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "apple-ii-monitor.h"
-#include "apple-ii-mmio.h"
+#include "apple-ii-io.h"
 
 char *PROGRAM_VERSION_NUMBER_LOCATION = (char *) 0xbffd;
 

@@ -1,10 +1,11 @@
-#include "apple-ii-monitor.h"
 #include "apple-ii-io.h"
 #include "apple-iie-io.h"
 #include "sound.h"
-#include "stdio.h"
-#include "stdlib.h"
+#include "paddle.h"
+#include "text-lores-io.h"
 
+typedef unsigned short size_t;
+int printf(const char *format, ...);
 void *memcpy(void *dest, const void *src, size_t count);
 
 // C adaptation of Integer Basic BREAKOUT program
@@ -28,7 +29,7 @@ void main_loop();
 void kill_ball();
 void end_game();
 
-unsigned char player_name[16];
+char player_name[16];
 
 unsigned int player_score = 0;
 unsigned char balls_remaining = 0;
@@ -48,20 +49,20 @@ enum appleii_lores_color BALL_COLOR = LORES_WHITE;
 
 void setup_text_mode() {
     *APPLEII_TEXTMODE_TEXT = 0;
-    *APPLEII_MONITOR_WNDLFT = 0;
-    *APPLEII_MONITOR_WNDWDTH = 39;
-    *APPLEII_MONITOR_WNDTOP = 0;
-    *APPLEII_MONITOR_WNDBTM = 24;
+    text_set_window_left(0);
+    text_set_window_width(40);
+    text_set_window_top(0);
+    text_set_window_bottom(24);
 }
 
 void setup_graphics_mode() {
     *APPLEII_MIXEDMODE_ON = 0;
     *APPLEII_HIRES_OFF = 0;
     *APPLEII_TEXTMODE_GRAPHICS = 0;
-    *APPLEII_MONITOR_WNDLFT = 0;
-    *APPLEII_MONITOR_WNDWDTH = 39;
-    *APPLEII_MONITOR_WNDTOP = 20;
-    *APPLEII_MONITOR_WNDBTM = 24;
+    text_set_window_left(0);
+    text_set_window_width(40);
+    text_set_window_top(20);
+    text_set_window_bottom(24);
 }
 
 void wait_for_vblank() {
@@ -70,14 +71,14 @@ void wait_for_vblank() {
 }
 
 void reset_round() {
-    appleii_setcol(BACKGROUND_COLOR);
-    appleii_plot(ball_x, ball_y / 3);
+    lores_set_color(BACKGROUND_COLOR);
+    lores_plot(ball_x, ball_y / 3);
     ball_x = 19;
     ball_y = rand() % 120;
     ball_dx = -1;
     ball_dy = (rand() % 5) - 2;
-    *APPLEII_MONITOR_CH = 5;
-    appleii_vtab(21);
+    text_set_htab(5);
+    text_set_vtab(21);
     if (balls_remaining > 1) {
         printf("%d BALLS LEFT\n", balls_remaining);
     } else {
@@ -88,19 +89,19 @@ void reset_round() {
 }
 
 void update_paddle() {
-    signed int paddle_y_raw = ((signed int) appleii_pread(0) - 20) / 6;
+    signed int paddle_y_raw = ((signed int) paddle_read(0) - 20) / 6;
     if (paddle_y_raw < 0) paddle_y_raw = 0;
     if (paddle_y_raw > 34) paddle_y_raw = 34;
     paddle_y = (unsigned char) paddle_y_raw;
 
-    appleii_setcol(PADDLE_COLOR);
-    appleii_vline(0, paddle_y, paddle_y + 5);
-    appleii_setcol(BACKGROUND_COLOR);
+    lores_set_color(PADDLE_COLOR);
+    lores_vline(0, paddle_y, paddle_y + 5);
+    lores_set_color(BACKGROUND_COLOR);
     if (paddle_y > 0) {
-        appleii_vline(0, 0, paddle_y - 1);
+        lores_vline(0, 0, paddle_y - 1);
     }
     if (paddle_y < 34) {
-        appleii_vline(0, paddle_y + 5, 39);
+        lores_vline(0, paddle_y + 5, 39);
     }
 }
 
@@ -108,7 +109,7 @@ void update_ball() {
     unsigned char old_ball_x = ball_x;
     unsigned char old_ball_y = ball_y;
 
-    appleii_setcol(BACKGROUND_COLOR);
+    lores_set_color(BACKGROUND_COLOR);
 
     ball_y += ball_dy;
     if (ball_y < 0 || ball_y >= 120) {
@@ -128,7 +129,7 @@ void update_ball() {
     } else {
         unsigned char ball_screen_x = ball_x;
         unsigned char ball_screen_y = ball_y / 3;
-        enum appleii_lores_color ball_pos_color = appleii_scrn(ball_screen_x, ball_screen_y);
+        enum appleii_lores_color ball_pos_color = lores_scrn(ball_screen_x, ball_screen_y);
         if (ball_pos_color == BACKGROUND_COLOR) {
             // do nothing
         } else if (ball_x == 0) {
@@ -140,20 +141,20 @@ void update_ball() {
         } else {
             // must be a block hit
             ball_dx = -ball_dx;
-            appleii_vline(ball_x, ball_screen_y & 0xfe, (ball_screen_y & 0xfe) + 1);
+            lores_vline(ball_x, ball_screen_y & 0xfe, (ball_screen_y & 0xfe) + 1);
             unsigned char block_value = ball_x / 2 - 9;
             player_score += block_value;
-            appleii_vtab(20);
-            *APPLEII_MONITOR_CH = 12;
+            text_set_vtab(20);
+            text_set_htab(12);
             printf("%3d\n", player_score);
             square_wave(1000, 127 - block_value * 2);
             square_wave(1500, 110 - block_value * 2);
         }
     }
     
-    appleii_plot(old_ball_x, old_ball_y / 3);
-    appleii_setcol(BALL_COLOR);
-    appleii_plot(ball_x, ball_y / 3);
+    lores_plot(old_ball_x, old_ball_y / 3);
+    lores_set_color(BALL_COLOR);
+    lores_plot(ball_x, ball_y / 3);
 }
 
 void kill_ball() {
@@ -179,25 +180,25 @@ const char *SCORE_RATINGS[] = {
 void main_loop() {
     pick_colors();
     setup_graphics_mode();
-    appleii_home();
-    appleii_vtab(20);
-    appleii_setcol(BACKGROUND_COLOR);
+    text_home();
+    text_set_vtab(20);
+    lores_set_color(BACKGROUND_COLOR);
     for (unsigned char i = 0; i <= 39; i++) {
-        appleii_vline(i, 0, 39);
+        lores_vline(i, 0, 39);
     }
     for (unsigned char i = 20; i <= 34; i += 2) {
-        *APPLEII_MONITOR_CH = i + 1;
+        text_set_htab(i + 1);
         printf("%d", i / 2 - 9);
-        appleii_setcol(EVEN_BRICK_COLOR);
-        appleii_vline(i, 0, 39);
-        appleii_setcol(ODD_BRICK_COLOR);
+        lores_set_color(EVEN_BRICK_COLOR);
+        lores_vline(i, 0, 39);
+        lores_set_color(ODD_BRICK_COLOR);
         for (unsigned char j = i % 4; j <= 39; j += 4) {
-            appleii_vline(i, j, j+1);
+            lores_vline(i, j, j+1);
         }
     }
-    *APPLEII_MONITOR_CH = 4;
+    text_set_htab(4);
     printf("SCORE =   0\n\n");
-    *APPLEII_MONITOR_WNDTOP = 21;
+    text_set_window_top(21);
 
     player_score = 0;
     balls_remaining = 5;
@@ -229,10 +230,11 @@ static enum appleii_lores_color pick_single_color() {
     int response;
     while (1) {
         printf(" COLOR (0 TO 15)");
-        unsigned char len = appleii_getln1();
+        char buffer[4];
+        unsigned char len = text_getln(buffer, 4);
         response = 0;
         for (unsigned char i = 0; i < len; i++) {
-            unsigned char c = APPLEII_MONITOR_INPUT_BUFFER[i] & 0x7f;
+            unsigned char c = buffer[i];
             if (c == ' ' || c == '\t' || c == '\n' || c == '\r') continue;
             if (c >= '0' && c <= '9') {
                 response = response * 10 + (c - '0');
@@ -252,9 +254,10 @@ static enum appleii_lores_color pick_single_color() {
 }
 
 void pick_colors() {
-    printf("STANDARD COLORS, %s\n", player_name);
+    printf("STANDARD COLORS, %s", player_name);
     printf("(Y/N)?");
-    unsigned char standard_color_response = appleii_rdkey() & 0x7f;
+    unsigned char standard_color_response = getchar();
+    printf("\n");
     if (standard_color_response != 'N' && standard_color_response != 'n') {
         // use standard colors
         BACKGROUND_COLOR = LORES_MAGENTA;
@@ -267,18 +270,18 @@ void pick_colors() {
     // pick custom colors
     setup_graphics_mode();
     for (unsigned char i = 0; i <= 39; i++) {
-        appleii_setcol((enum appleii_lores_color) (i/2 * (i < 32)));
-        appleii_vline(i, 0, 39);
+        lores_set_color((enum appleii_lores_color) (i/2 * (i < 32)));
+        lores_vline(i, 0, 39);
     }
-    *APPLEII_MONITOR_WNDTOP = 20;
+    text_set_window_top(20);
     printf("\n\n\n");
     for (unsigned char i = 0; i <= 15; i++) {
-        appleii_vtab(i % 2 + 20);
-        *APPLEII_MONITOR_CH = i * 2 + (i < 10);
+        text_set_vtab(i % 2 + 20);
+        text_set_htab(i * 2 + (i < 10));
         printf("%d", i);
     }
-    *APPLEII_MONITOR_WNDTOP = 22;
-    appleii_vtab(23);
+    text_set_window_top(22);
+    text_set_vtab(23);
     printf("\n");
     printf("BACKGROUND");
     BACKGROUND_COLOR = pick_single_color();
@@ -294,32 +297,30 @@ void pick_colors() {
 
 int main() {
     setup_text_mode();
-    appleii_home();
-    *APPLEII_MONITOR_CH = 9;
-    appleii_vtab(4);
+    text_home();
+    text_set_htab(9);
+    text_set_vtab(4);
     printf("*** BREAKOUT ***\n\n");
     printf("  OBJECT IS TO DESTROY ALL BRICKS\n\n");
 
     {
         printf("HI, WHAT'S YOUR NAME?");
-        unsigned char player_name_len = appleii_getln1();
-        if (player_name_len > 15) player_name_len = 15;
-        memcpy(player_name, (void *) APPLEII_MONITOR_INPUT_BUFFER, player_name_len);
-        player_name[player_name_len] = '\0';
+        text_getln(player_name, 16);
     }
 
     while (1) {
-        srand(*APPLEII_MONITOR_RND);
+        srand(1); // TODO: Get rand seed from getchar()
         main_loop();
         printf("ANOTHER GAME, %s? (Y/N)", player_name);
-        unsigned char response = appleii_rdkey() & 0x7f;
+        unsigned char response = getchar();
+        printf("\n");
         if (response != 'Y' && response != 'y') {
             break;
         }
     }
 
-    // NOTE: The old program printed "GAME OVER" here,
-    // but that won't show up because ProDOS will take
-    // us back to the system menu
+    setup_text_mode();
+    text_home();
+    printf("GAME OVER\n\n");
     return 0;
 }
